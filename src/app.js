@@ -155,7 +155,6 @@ function draw(){
   ctx.save();ctx.setTransform(canvas.width/W,0,0,canvas.height/H,0,0);
   drawSky(s,now);
   if(!layout){ctx.restore();return;}
-  const night=!!s?.night;
   // 접촉선
   for(const tr of contactTrails){const age=(now-tr.at)/650;if(age>1)continue;ctx.strokeStyle=p.contact;ctx.globalAlpha=.45*(1-age);ctx.lineWidth=1;ctx.beginPath();for(let i=0;i<tr.pairs.length;i+=2){const [x1,y1]=px(tr.pairs[i]),[x2,y2]=px(tr.pairs[i+1]);ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);}ctx.stroke();}
   ctx.globalAlpha=1;
@@ -180,7 +179,6 @@ function draw(){
   sparks=remain;
   const keep=[];for(const rp of ripples){const t=(now-rp.at)/700;if(t>=1)continue;keep.push(rp);ctx.strokeStyle=p.spark;ctx.globalAlpha=(1-t)*.8;ctx.lineWidth=2-t;ctx.beginPath();ctx.arc(rp.x,rp.y,6+t*16,0,Math.PI*2);ctx.stroke();}
   ripples=keep;ctx.globalAlpha=1;
-  if(night){ctx.fillStyle='#141a33';ctx.globalAlpha=.28;ctx.fillRect(0,SKY,W,H-SKY);ctx.globalAlpha=1;}
   ctx.restore();
 }
 function niceMax(v){const steps=[10,20,30,50,80,120,160,240,320,400,469];return steps.find(x=>x>=v)||469;}
