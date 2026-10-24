@@ -166,3 +166,5 @@ a.series-item:focus-visible{outline:3px solid #a5791c;outline-offset:3px}
 [data-theme=dark] .arena-wrap.night .arena-hud,[data-theme=dark] .arena-wrap.night .arena-hud small,[data-theme=dark] .arena-wrap.night .arena-hud #clock{color:#efe6d8}
 @media(max-width:780px){.arena-hud{top:6px}.arena-hud>span:first-child{display:none}.arena-hud>span:last-child{margin-left:auto}.arena-hud #clock{font-size:14px;line-height:1.3}.arena-hud small,.arena-hud>span:last-child small{display:none}.arena-floor{bottom:8px;font-size:11px}}
 .arena-floor>span:first-child{background:color-mix(in srgb,var(--paper) 72%,transparent);padding:2px 7px;border-radius:5px}
+
+.intro p{word-break:keep-all}
