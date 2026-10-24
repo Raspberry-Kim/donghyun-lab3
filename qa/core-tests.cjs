@@ -53,7 +53,7 @@ check('All examples run to completion',()=>{for(const ex of examples){const m=ex
 check('Example outcomes tell the intended stories',()=>{
   const last=id=>exec(examples.find(e=>e.id===id).code);
   const m=last('measles');assert(m.state.cum>400);
-  const cov=last('measles-coverage').allLogs.filter(l=>/유행 종료/.test(l.text));assert.strictEqual(cov.length,2);const sizes=cov.map(l=>Number(l.text.match(/누적 감염 (\d+)명/)[1]));assert(sizes[1]<sizes[0],sizes.join(','));
+  const c90=last('measles-90').state.cum,c94=last('measles-94').state.cum;assert(c94<c90,'coverage '+c90+' vs '+c94);
   const tgt=exec(examples.find(e=>e.id==='pertussis-targeted').code);assert(tgt.state.cum<150,'targeted pertussis '+tgt.state.cum);
 });
 fs.writeFileSync(path.join(__dirname,'core-results.json'),JSON.stringify({passed:count,at:new Date().toISOString()},null,1)+'\n');

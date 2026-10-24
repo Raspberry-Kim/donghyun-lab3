@@ -1,7 +1,7 @@
 /* 동현빌의 계산 스레드. 바뀌지 않은 동현랭 실행기가 출력한 정수 묶음만 마을에 전달한다. */
 let D,village,world,vm,running=false,runId=0,steps=0,pending=0,token='',packet=[],queue=[],logs=[],wallStart=0,sentSeries=0,nightHold=0,eventsBuffer=[],lastContacts=[];
 const arity={1:1,2:1,3:1,4:1,5:2,6:1,7:1,8:1,9:1,10:1,11:1};
-const SPEED_STEPS={1:2,2:8,3:32},NIGHT_HOLD={1:10,2:6,3:1},MAX_DAYS=365;
+const FRAME_MS=160/3,SPEED_STEPS={1:2,2:8,3:32},NIGHT_HOLD={1:10,2:6,3:1},MAX_DAYS=365;
 const assert=(ok,msg)=>{if(!ok)throw Error(msg);};
 const range=(x,a,b,name)=>assert(Number.isSafeInteger(x)&&x>=a&&x<=b,`${name}: ${a}~${b} 정수여야 한다.`);
 const RULES={1:'무작위',2:'접촉이 많은 사람부터',3:'첫 환자 주변 고리',4:'접촉이 적은 사람부터'};
@@ -91,7 +91,7 @@ function loop(id){
       }
     }
     snapshot(running?'frame':'done',running?{}:{allSeries:village.series,wallMs:performance.now()-wallStart});
-    if(running)setTimeout(()=>loop(id),Math.max(0,40-(performance.now()-t)));
+    if(running)setTimeout(()=>loop(id),Math.max(0,FRAME_MS-(performance.now()-t)));
   }catch(e){fail(e);}
 }
 onmessage=({data:m})=>{
