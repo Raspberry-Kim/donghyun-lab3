@@ -168,3 +168,7 @@ a.series-item:focus-visible{outline:3px solid #a5791c;outline-offset:3px}
 .arena-floor>span:first-child{background:color-mix(in srgb,var(--paper) 72%,transparent);padding:2px 7px;border-radius:5px}
 
 .intro p{word-break:keep-all}
+
+/* Editor code follows Donghyun-lang at every width: 15px/1.7, and 13.5px on phones (<=480px). */
+#code,#lines{font-size:15px;line-height:1.7}
+@media(max-width:480px){#code,#lines{font-size:13.5px}}
