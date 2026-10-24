@@ -1,0 +1,9 @@
+dist/
+release/
+*.zip
+동현빌-v*.html
+qa/*.png
+qa/*.webm
+qa/*.csv
+qa/*.dh
+.DS_Store

@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="실제로 기록된 469명의 사흘치 만남 위에서 홍역·백일해·인플루엔자의 유행과 접종·격리를 동현랭 코드로만 실험하는 동현빌.">
+  <title>동현빌™ · 동현랭으로 지켜보는 마을 유행 실험실</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<header class="header">
+  <a class="brand" href="#" aria-label="동현빌 실험실로"><span class="brand-main">동현<span>빌</span><sup>TM</sup></span><i class="brand-divider"></i><span class="brand-sub">VILLAGE LAB<small>코드로 지켜보는 작은 마을의 유행</small></span></a>
+  <div class="edition">v0.1 <span>마을 유행 실험실</span><button id="theme" class="icon-btn" aria-label="밝은 화면과 어두운 화면 전환" title="화면 전환" aria-pressed="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button></div>
+</header>
+<main>
+<!-- SERIES-NAV-START -->
+<nav class="series-strip" aria-label="동현 프로젝트 이동"><p class="series-context"><strong>동현의 작은 실험들</strong>하나의 언어, 세 개의 작은 세계</p><div class="series-links"><a class="series-item" data-series="lang" href="https://raspberry-kim.github.io/donghyun-lang/" aria-label="동현랭™ 언어 플레이그라운드로 이동"><span class="series-name">동현랭<sup>™</sup></span><span class="series-note">언어</span></a><a class="series-item" data-series="fly" href="https://raspberry-kim.github.io/donghyun-lab1/" aria-label="동현초™ 초파리 회로실험실로 이동"><span class="series-name">동현초<sup>™</sup></span><span class="series-note">초파리</span></a><a class="series-item" data-series="worm" href="https://raspberry-kim.github.io/donghyun-lab2/" aria-label="동현파™ 선충 회로실험실로 이동"><span class="series-name">동현파<sup>™</sup></span><span class="series-note">선충</span></a><span class="series-item" data-series="village" aria-current="page"><span class="series-name">동현빌<sup>™</sup></span><span class="series-note">마을</span></span></div></nav>
+<!-- SERIES-NAV-END -->
+  <section class="intro">
+    <div><div class="eyebrow">REAL CONTACT NETWORK × ESOTERIC LANGUAGE</div><h1>마을 유행 실험실: <span class="title-brand">동현<span>빌</span><sup>TM</sup></span></h1><p>실제로 기록된 469명의 사흘치 만남 위에, 동현랭으로 병원체 하나와 백신을 놓는다.</p></div>
+    <div class="model-stamp"><strong>469 <span>명</span></strong><strong>102,831 <span>거리 기록</span></strong><small>영국 Haslemere · 2017년 10월 사흘 · 5분 간격</small></div>
+  </section>
+  <nav class="tabs" aria-label="실험실 메뉴"><button class="active" data-tab="lab" aria-current="page">실험실</button><button data-tab="protocol">동현랭 조작 규약</button><button data-tab="science">모델과 출처</button><span>조작은 오직 동현랭으로</span></nav>
+  <div class="getting-started"><p><strong>처음이라면?</strong> 예제를 고르고 <b>코드 실행</b>을 눌러 보자. 병원체·첫 환자·접종·격리는 모두 동현랭 명령으로만 정한다.</p><a href="https://raspberry-kim.github.io/donghyun-lang/" target="_blank" rel="noopener">동현랭 배우기 · 실행기 ↗</a></div>
+
+  <section id="tab-lab" class="tab-panel">
+    <div class="lab-grid">
+      <div class="observation">
+        <div class="section-title"><h2><span>A</span> 마을</h2><span id="status" role="status">마을 불러오는 중</span></div>
+        <div class="arena-wrap">
+          <canvas id="arena" width="960" height="720" role="img" aria-label="469명의 마을 사람이 실제 접촉망 모양으로 흩어져 있다. 감염 상태에 따라 색이 바뀌고, 전파가 일어나면 불꽃이 건너간다."></canvas>
+          <div class="arena-hud"><span>HASLEMERE, OCT 2017<br><small>469명 · 실제 접촉 기록</small></span><span><span id="clock">0일째 07:00</span><small id="clock-note">모의 시간 · 밤은 건너뜀</small></span></div>
+          <div class="arena-floor"><span id="mode">출발 대기</span><span>960 × 720</span></div>
+          <div id="welcome" class="welcome"><div class="eyebrow">A LITTLE VILLAGE, A LITTLE OUTBREAK</div><h3>홍역 / 접종이 없는 마을</h3><p>첫 환자 한 명에서 마을 전체까지, 코드 한 번으로 지켜보자.</p><button id="demo" disabled>실험 시작 ↗</button></div>
+        </div>
+        <div class="legend"><span><i class="k-s"></i>감수성</span><span><i class="k-e"></i>잠복</span><span><i class="k-i"></i>전염 중</span><span><i class="k-r"></i>회복</span><span><i class="k-v"></i>접종·면역</span><span><i class="k-vf"></i>접종·효과 없음</span><span><i class="k-q"></i>격리</span><span id="cum-count" class="hint">누적 감염 0명</span></div>
+        <div class="meters">
+          <div><span>S</span><small>감수성</small><strong id="m-s">469 <small>명</small></strong></div>
+          <div><span>E</span><small>잠복</small><strong id="m-e">0 <small>명</small></strong></div>
+          <div><span>I</span><small>전염 중</small><strong id="m-i">0 <small>명</small></strong></div>
+          <div><span>R</span><small>회복</small><strong id="m-r">0 <small>명</small></strong></div>
+          <div><span>V</span><small id="m-v-note">접종</small><strong id="m-v">0 <small>명</small></strong></div>
+          <div><span>Q</span><small>격리 중</small><strong id="m-q">0 <small>명</small></strong></div>
+        </div>
+        <div class="section-title chart-title"><h2><span>B</span> 유행 곡선</h2><span id="chart-scale">Y축 자동 범위 · 단위 명</span></div>
+        <canvas id="chart" width="960" height="360" role="img" aria-label="날짜에 따른 전염 중·잠복 인원의 누적 면적과 회복·접종 면역 인원의 선 그래프"></canvas>
+        <div class="chart-legend"><span class="k-i">전염 중 (면적)</span><span class="k-e">잠복 (면적)</span><span class="k-r">회복 (선)</span><span class="k-v">접종으로 면역 (점선)</span></div>
+        <p class="model-note">점 하나가 한 사람이고, 자리는 사흘 동안 자주 가까이 있었던 사람끼리 모이도록 계산한 배치다. 실제 집이나 거리의 위치가 아니다. 점선 길은 4 m 이내에서 30분 이상 함께 기록된 사이, 가는 선은 지금 이 5분 동안 4 m 이내에 있는 사이다. 전파 자체는 50 m까지의 모든 거리 기록에 거리별 가중치를 두어 계산하며, 밤 8시간은 기록이 없어 전파도 없다고 둔다. 불꽃과 물결은 전파 순간을 보여 주는 그림이다.</p>
+      </div>
+      <div class="coding-column">
+        <section class="editor-panel">
+          <div class="section-title"><h2><span>C</span> 동현랭 실험 코드</h2><span>experiment.dh</span></div>
+          <select id="example" aria-label="동현랭 예제 선택"></select><p id="example-note"></p>
+          <div class="code-wrap"><div id="lines" aria-hidden="true"></div><textarea id="code" aria-label="동현랭 코드" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea></div>
+          <div class="code-meta"><span id="line-count"></span><span>정수 출력 → 실험 명령 · ⌘/Ctrl ↵ 실행</span></div>
+          <div class="run-row"><button id="run" class="primary" disabled>코드 실행 <span>↗</span></button><button id="halt" disabled>오겡끼데스까</button></div>
+          <p id="result" aria-live="polite">예제를 고른 뒤 실행해 보자. 코드만 바꾸어 병원체·접종·격리·기간을 조절할 수 있다.</p>
+          <div class="file-row"><button id="save">.dh 저장</button><label class="file-label">.dh 열기<input id="open" type="file" accept=".dh,.txt,text/plain" hidden></label><button id="csv" disabled>관측 CSV</button></div>
+        </section>
+        <section class="log-panel"><div class="section-title"><h2><span>D</span> 실험 기록</h2><span id="step-count">0문장</span></div><ol id="log"><li><time>  0.0일</time>실행 대기. 아직 아무도 아프지 않다.</li></ol></section>
+        <div class="pipeline">동현랭 코드 <b>→</b> 병원체·첫 환자·접종·격리 <b>→</b> 실제 접촉 기록 위의 전파 <b>→</b> 마을의 색 <b>→</b> 유행 곡선<br><small>꽥꽥으로 읽고, 방침을 바꾸어 다시 실험한다.</small></div>
+      </div>
+    </div>
+  </section>
+  <section id="tab-protocol" class="tab-panel document" hidden>
+    <div class="doc-heading"><div class="eyebrow">EXPERIMENT I/O · v0.1</div><h2>병원체에서 백신까지, 명령은 동현랭으로.</h2><p>버튼이나 슬라이더로 접종하지 않는다. 동현랭이 출력한 정수를 실험실이 읽고, 실제 접촉 기록 위에서 전파를 계산한다. 명령 번호 뒤에 인수를 차례로 출력하면 한 묶음이 된다.</p></div>
+    <div class="table-wrap"><table><thead><tr><th>명령</th><th>하는 일</th><th>인수</th></tr></thead><tbody>
+      <tr><td>1</td><td>마을 초기화</td><td>시드 · 같은 시드는 같은 우연을 재현한다</td></tr>
+      <tr><td>2</td><td>병원체 선택</td><td>1 홍역 · 2 백일해 · 3 인플루엔자 · 4 BBC 팬데믹 모의 독감</td></tr>
+      <tr><td>3</td><td>첫 환자</td><td>사람 번호 1~469 · 0이면 무작위</td></tr>
+      <tr><td>4</td><td>한 사람 접종</td><td>사람 번호 1~469</td></tr>
+      <tr><td>5</td><td>규칙에 따라 접종</td><td>인원 0~469 · 규칙 1 무작위 / 2 접촉 많은 순 / 3 첫 환자 주변 고리 / 4 접촉 적은 순</td></tr>
+      <tr><td>6</td><td>백신 효과</td><td>0~100% · 이후 접종에 적용 · 기본값은 병원체별</td></tr>
+      <tr><td>7</td><td>시간 진행</td><td>일수 1~365 · 한 실행에 모두 365일까지</td></tr>
+      <tr><td>8</td><td>관측값 요청</td><td>항목 1~10 · 다음 꽥꽥으로 읽기</td></tr>
+      <tr><td>9</td><td>격리 정책</td><td>0 없음 / 1 증상자 격리 / 2 증상자 격리 + 가까운 접촉자 14일 격리</td></tr>
+      <tr><td>10</td><td>정수 기록</td><td>기록할 정수</td></tr>
+      <tr><td>11</td><td>재생 속도</td><td>1 느리게 / 2 보통 / 3 빠르게 · 계산 결과는 같다</td></tr>
+    </tbody></table></div>
+    <div class="doc-columns"><div><h3>순서와 규칙</h3><p>병원체(2)를 고른 뒤 접종(4·5)과 첫 환자(3)를 정하고 시간(7)을 진행한다. 병원체와 첫 환자는 시간이 흐르기 전에만 바꿀 수 있고, 접종·백신 효과·격리 정책은 유행 도중에도 바꿀 수 있다. 초기화(1)는 모든 것을 지우고 새 마을에서 시작하므로, 한 프로그램에서 여러 조건을 이어서 비교할 수 있다.</p><p>접종은 아직 감염되지 않은 사람에게만 적용되며, 백신 효과(%)의 확률로 완전한 면역이 생기고 나머지는 접종을 받았어도 감수성자로 남는다. 접종 즉시 효과가 생기는 단순화다.</p></div><div><h3>읽고 다시 개입하기</h3><p>관측 항목: 1 경과 일수, 2 감수성자, 3 잠복기, 4 전염 중, 5 회복, 6 접종자, 7 누적 감염, 8 격리 중, 9 최근 하루 새 감염, 10 첫 환자가 직접 감염시킨 수.</p><p>모든 값은 사람 수 정수다. 문장 끝은 <code>~</code>, 정수 출력은 <code>뿡뿡</code>, 줄바꿈은 <code>뿡뿡뿡</code>이다. 예제 09는 관측값을 조건문에 넣어 뒤늦은 접종을 결정하고, 예제 11은 반복문으로 하루씩 읽어 기록한다.</p></div></div>
+    <h3>실험의 경계</h3><p>한 프로그램의 모의 기간은 365일, 코드 길이는 100,000자, 실행은 30만 문장까지다. 각 실행은 새 실험이다. 예제 선택·코드 편집·파일 저장·문서 읽기·화면 전환은 마을을 조작하지 않는다. 중단 버튼도 고정된 동현랭 <code>오겡끼데스까</code> 프로그램을 실행한다.</p>
+    <p>전문과 범위는 배포 묶음의 <code>SPEC.md</code>에 있다. 원래 동현랭 문법은 <a href="https://raspberry-kim.github.io/donghyun-lang/" target="_blank" rel="noopener">동현랭 플레이그라운드</a>에서 배울 수 있다.</p>
+  </section>
+  <section id="tab-science" class="tab-panel document" hidden>
+    <nav class="reference-tabs" aria-label="모델과 출처 문서"><button type="button" data-reference="overview" class="active" aria-pressed="true" aria-controls="reference-overview">모델 설명</button><button type="button" data-reference="provenance" aria-pressed="false" aria-controls="offline-provenance">데이터 계보</button><button type="button" data-reference="credits" aria-pressed="false" aria-controls="offline-credits">전체 출처·이용 안내</button><button type="button" data-reference="licenses" aria-pressed="false" aria-controls="offline-licenses">글꼴·코드 라이선스</button></nav>
+    <div id="reference-overview" class="reference-panel" data-reference-panel="overview" tabindex="-1">
+      <div class="doc-heading"><div class="eyebrow">BEHIND THE LITTLE VILLAGE</div><h2>이 마을의 만남은 진짜다. 병은 가상이다.</h2><p>2017년 10월, 영국 서리의 작은 도시 Haslemere에서 469명이 사흘 동안 스마트폰 앱으로 서로의 거리를 기록했다. BBC 다큐멘터리 「Contagion! The BBC Four Pandemic」을 위한 시민 과학 실험이었고, 연구진은 5분 간격의 거리 기록을 공개했다. 동현빌은 그 기록을 그대로 가져와, 그 위에 가상의 병원체를 놓는다.</p></div>
+      <div class="science-block"><span class="index">01</span><div><h3>469명의 사흘, 102,831개의 거리 기록</h3><p>기록은 목요일 아침 7시부터 토요일 밤 10시 55분까지, 하루 16시간씩 5분 간격으로 50 m 이내에 있었던 두 사람의 거리를 담는다. 위치 자체는 공개되지 않았고 사람은 번호로만 남아 있다. 사흘 동안 한 사람은 평균 35명과 50 m 이내, 14명과 20 m 이내, 5명과 4 m 이내에 있었다. 가장 많은 사람을 만난 330번은 4 m 이내에서 37명을 만났다. <a href="https://github.com/skissler/haslemere" target="_blank" rel="noopener">공개 데이터 저장소</a> · <a href="https://www.nature.com/articles/s41591-020-1036-8" target="_blank" rel="noopener">이 접촉망으로 접촉자 추적을 연구한 Firth 등(2020)</a> · <a href="PROVENANCE.md">변환·검증 내역</a></p></div></div>
+      <div class="science-block"><span class="index">02</span><div><h3>전파 규칙은 다큐멘터리 모의의 것을 따른다.</h3><p>연구진은 다큐멘터리의 모의에서 두 사람의 거리 d에 대해 전파 위험 λ = a·exp(−d/ρ)를 두고, 한 단계의 감염 확률을 1 − exp(−Σλ)로 계산했다. 동현빌도 같은 규칙을 쓰며 ρ는 10 m로 둔다. 다른 점은 a다. 다큐멘터리는 a = 1의 빠른 가상 독감을 썼지만, 동현빌의 홍역·백일해·인플루엔자는 이 접촉망 위에서 첫 환자 한 명이 평균적으로 감염시키는 수가 문헌의 기본감염재생산수와 같아지도록 a를 보정했다. 잠복기와 전염 기간은 병원체별로 다르다.</p><p>사흘치 기록은 날짜 순서대로 되풀이된다. 감염된 사람은 잠복기(E)를 지나 전염기(I)가 되고, 정해진 기간이 지나면 회복(R)한다. 밤 8시간은 기록이 없으므로 전파가 없다고 두는데, 이것은 집 안의 전파가 빠진다는 뜻이라 실제보다 느리고 작은 유행이 될 수 있다.</p></div></div>
+      <div class="science-block"><span class="index">03</span><div><h3>홍역·백일해·인플루엔자의 숫자는 문헌에서 왔다.</h3><p>홍역은 기본감염재생산수 12~18의 가운데인 15, 노출 뒤 열흘의 잠복과 8일의 전염 기간, 2회 접종 효과 97%를 쓴다. 백일해는 유럽 5개국 자료의 추정치 5.5, 잠복 8일, 전염 21일, 접종 효과 85%. 인플루엔자는 계절 독감 추정치 중앙값에 가까운 1.3, 잠복 1일, 전염 5일, 접종 효과 50%다. 모두 한 값으로 고정한 교육용 설정이며, 나이·면역력·계절에 따른 차이는 없다. <a href="https://pubmed.ncbi.nlm.nih.gov/28757186/" target="_blank" rel="noopener">홍역 R0 체계적 고찰</a> · <a href="https://www.cdc.gov/pinkbook/hcp/table-of-contents/chapter-13-measles.html" target="_blank" rel="noopener">CDC 홍역</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC2889930/" target="_blank" rel="noopener">백일해 R0 추정</a> · <a href="https://www.cdc.gov/pinkbook/hcp/table-of-contents/chapter-16-pertussis.html" target="_blank" rel="noopener">CDC 백일해</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/25186370/" target="_blank" rel="noopener">인플루엔자 R0 체계적 고찰</a> · <a href="https://www.cdc.gov/pinkbook/hcp/table-of-contents/chapter-12-influenza.html" target="_blank" rel="noopener">CDC 인플루엔자</a></p></div></div>
+      <div class="science-block"><span class="index">04</span><div><h3>이 마을에서는 홍역이 50 m를 쓴다.</h3><p>469명이 20 m 이내에서 만난 사람은 평균 14명이다. 20 m 안에서만 전파가 가능하다면, 첫 환자가 평균 15명을 감염시키는 홍역은 어떤 a로도 만들 수 없다. 그래서 동현빌의 세 병원체는 공개 기록의 범위인 50 m까지를 쓰고, 거리가 멀수록 위험을 지수적으로 줄인다. 50 m는 홍역 바이러스가 날아가는 거리가 아니라 "같은 건물이나 거리에 있었다"는 대리 지표이며, 홍역이 실내 공기로 퍼진다는 점과 어울리는 가정이지 측정은 아니다. 모의 독감(4번)은 다큐멘터리대로 20 m 차단을 그대로 둔다.</p></div></div>
+      <div class="science-block"><span class="index">05</span><div><h3>접종과 격리는 정책의 뼈대만 담았다.</h3><p>접종은 백신 효과(%)의 확률로 완전한 면역을 주고 나머지에는 아무 효과가 없는 "전부 아니면 전무" 모형이다. 접종 즉시 효과가 생기며, 2회 접종 일정이나 면역 약화는 없다. 격리 정책 1은 전염이 시작되고 하루 뒤(증상을 알아챈 뒤)에 그 사람을 다른 사람과 만나지 않게 하고, 정책 2는 그 사람이 전염 기간에 4 m 이내에서 만났던 사람도 14일 동안 격리한다. 검사·추적의 지연과 불완전함은 들어 있지 않다. 홍역처럼 증상 전부터 전염되는 병에서 격리가 왜 늦는지를 보는 용도다.</p></div></div>
+      <div class="science-block" id="credits" tabindex="-1"><span class="index">06</span><div><h3>가져온 데이터와 새로 만든 것을 구별한다.</h3><p>접촉 기록은 Kissler 등이 공개한 Haslemere 데이터(저장소 README는 코드에 GPL-3을 적고 데이터 파일의 조건은 따로 적지 않았다), 앱 코드는 MIT, 글꼴은 SIL OFL 조건을 따른다. 가공 데이터와 변환 도구도 함께 제공한다. <a href="#offline-credits">전체 출처·이용 안내</a>에서 원 연구진과 가공 내역을 확인하고, <a id="data-download" href="#" download="donghyunbil-village.json">가공 데이터 JSON 저장</a>으로 기계 판독 가능한 데이터도 받을 수 있다.</p></div></div>
+      <aside class="maker-note"><span class="eyebrow">만든 사람의 작은 고백</span><h3>이번에는 본업이다. 그래도 장난감이다.</h3><p>인하대학교 의과대학 김동현 교수는 백신학·감염학을 연구한다. 동현초·동현파에서 남의 전공을 빌렸다면, 동현빌은 자기 전공을 작은 마을에 담았다. 다만 이 마을은 어떤 실제 지역의 예측도 아니고, 접종 정책을 결정하는 도구도 아니다. 실제 만남 위에서 숫자들이 어떻게 움직이는지 손으로 만져 보는 장난감이다.</p></aside>
+    </div>
+    <!-- REFERENCE_DOCUMENTS -->
+  </section>
+</main>
+<footer><span>동현빌 v0.1 · 인하대학교 의과대학 교수 김동현</span><span>Haslemere 공개 접촉 기록 · 교육용 모델 · <a href="#credits">출처·이용 조건</a></span><span><a href="https://raspberry-kim.github.io/donghyun-lang/" target="_blank" rel="noopener">동현랭</a> · <a href="https://github.com/Raspberry-Kim/donghyun-lang" target="_blank" rel="noopener">동현랭 GitHub</a> · <a href="https://github.com/Raspberry-Kim/donghyun-lab3" target="_blank" rel="noopener">동현빌 GitHub</a> · <a href="https://raspberry-kim.github.io/donghyun-lab1/" target="_blank" rel="noopener">동현초</a> · <a href="https://raspberry-kim.github.io/donghyun-lab2/" target="_blank" rel="noopener">동현파</a></span></footer>
+<script>window.VILLAGE_CONFIG={worker:"./worker.js",data:"./village.json"};</script>
+<script type="module" src="./app.js"></script>
+</body></html>

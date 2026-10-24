@@ -1,0 +1,16 @@
+{
+  "name": "donghyun-lab3",
+  "version": "0.1.0",
+  "private": true,
+  "description": "동현빌™: 동현랭으로 지켜보는 마을 유행 실험실",
+  "scripts": {
+    "data": "node tools/build-village.cjs",
+    "test": "node qa/core-tests.cjs && node qa/docs-tests.cjs",
+    "examples": "node qa/run-examples.cjs",
+    "build": "node build.cjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "SEE LICENSE IN LICENSE"
+}
