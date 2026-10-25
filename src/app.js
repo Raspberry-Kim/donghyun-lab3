@@ -133,7 +133,7 @@ $('.file-label').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault
 $('#open').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;if(busy){$('#result').textContent='중단한 뒤 파일을 열 수 있다.';e.target.value='';return;}if(f.size>400000){$('#result').textContent='파일이 너무 크다. 400 KB 이하의 동현랭 코드를 열어라.';return;}const t=await f.text();if(t.length>100000){$('#result').textContent='코드는 100,000자까지다.';return;}$('#code').value=t;codeChanged();$('#result').textContent='코드를 불러왔다. 실행하면 새 실험으로 시작한다.';e.target.value='';};
 $('#csv').onclick=()=>{
   if(!allSeries.length)return;const esc=v=>'"'+String(v??'').replaceAll('"','""')+'"';
-  const meta=[['# model','동현빌 0.3 / 469 people / real 5-minute proximity log repeated over 3 recorded days / stochastic SEIR, hourly samples'],['# data','Kissler et al., BBC Pandemic Haslemere dataset; https://github.com/skissler/haslemere'],['# limitation','Nights and homes are not recorded; three days are repeated; not a forecast for any real place'],['# code',lastSource]],keys=Object.keys(allSeries[0]);
+  const meta=[['# model','동현빌 0.33 / 469 people / real 5-minute proximity log repeated over 3 recorded days / stochastic SEIR, hourly samples'],['# data','Kissler et al., BBC Pandemic Haslemere dataset; https://github.com/skissler/haslemere'],['# limitation','Nights and homes are not recorded; three days are repeated; not a forecast for any real place'],['# code',lastSource]],keys=Object.keys(allSeries[0]);
   download('donghyunbil-observations.csv','\ufeff'+meta.map(r=>r.map(esc).join(',')).join('\n')+'\n'+keys.join(',')+'\n'+allSeries.map(s=>keys.map(k=>esc(s[k])).join(',')).join('\n'),'text/csv;charset=utf-8');
 };
 function setup(c,context,h){
@@ -217,7 +217,7 @@ function drawChart(){
   cc.restore();
   $('#chart-scale').textContent=`Y축 0–${ymax}명 · 자동 범위 · X축 ${span}일 · 한 시간 간격 표본`;
 }
-window.render_game_to_text=()=>JSON.stringify({app:'동현빌',version:'0.3',busy,state:state?{day:state.day,clock:state.clock,night:state.night,counts:state.counts,cum:state.cum,pathogen:state.pathogenName,index:state.index}:null,coordinates:'960×720, x right, y down; sky strip 44px at top; 469 villagers at fixed positions'});
+window.render_game_to_text=()=>JSON.stringify({app:'동현빌',version:'0.33',busy,state:state?{day:state.day,clock:state.clock,night:state.night,counts:state.counts,cum:state.cum,pathogen:state.pathogenName,index:state.index}:null,coordinates:'960×720, x right, y down; sky strip 44px at top; 469 villagers at fixed positions'});
 let ticking=false;function animate(){if(ticking)return;ticking=true;const frame=()=>{draw();if(busy&&!reduced)requestAnimationFrame(frame);else{ticking=false;draw();drawChart();}};requestAnimationFrame(frame);}
 let chartTimer=0;const chartLoop=()=>{if(busy)drawChart();if(busy)chartTimer=setTimeout(chartLoop,500);};
 $('#run').addEventListener('click',()=>{animate();clearTimeout(chartTimer);chartLoop();});$('#slow').addEventListener('click',()=>{animate();clearTimeout(chartTimer);chartLoop();});$('#demo').addEventListener('click',()=>{animate();clearTimeout(chartTimer);chartLoop();});
