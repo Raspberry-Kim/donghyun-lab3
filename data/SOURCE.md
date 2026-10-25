@@ -14,4 +14,4 @@
 | `raw/README-haslemere.md` | 원 저장소 README (코드 GPL-3 명시, 데이터 파일 라이선스는 적혀 있지 않음) |
 | `village.json` | `tools/build-village.cjs`가 만든 앱용 파일. 손실 없는 압축 기록, 화면 배치, 접촉 수 요약, 병원체 설정과 보정값, 원 파일의 SHA-256 |
 
-원 파일은 바꾸지 않았다. 다시 만들려면 `npm run data`.
+원 파일은 변경 없음. 다시 만들려면 `npm run data`.
