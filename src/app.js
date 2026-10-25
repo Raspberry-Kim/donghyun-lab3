@@ -22,7 +22,9 @@ const dhHl=document.createElement('div');dhHl.id='hl';dhHl.setAttribute('aria-hi
 dhCode.parentNode.insertBefore(dhArea,dhCode);dhArea.append(dhHl,dhCode);
 function dhSync(){dhHl.scrollTop=dhCode.scrollTop;dhHl.scrollLeft=dhCode.scrollLeft;}
 function dhMetrics(){const cs=getComputedStyle(dhCode);for(const p of ['paddingTop','paddingRight','paddingBottom','paddingLeft','fontFamily','fontSize','lineHeight','tabSize','letterSpacing'])dhHl.style[p]=cs[p];}
-function dhHighlight(){dhMetrics();dhHl.innerHTML=dhCode.value.split('\n').map(l=>`<span class="ln">${dhLine(l)||' '}</span>`).join('')+'<span class="ln"> </span>';dhSync();}
+let dhCur=0;
+function dhMark(n){if(n===dhCur)return;dhCur=n;dhHl.querySelectorAll('.ln.cur').forEach(e=>e.classList.remove('cur'));if(n>0)dhHl.children[n-1]?.classList.add('cur');}
+function dhHighlight(){dhCur=0;dhMetrics();dhHl.innerHTML=dhCode.value.split('\n').map(l=>`<span class="ln">${dhLine(l)||' '}</span>`).join('')+'<span class="ln"> </span>';dhSync();}
 dhCode.addEventListener('scroll',dhSync);addEventListener('resize',dhHighlight);
 function codeChanged(){const n=$('#code').value.split('\n').length;$('#line-count').textContent=n+'줄';$('#lines').textContent=Array.from({length:n},(_,i)=>i+1).join('\n');dhHighlight();}
 function selectExample(){
@@ -51,7 +53,7 @@ function openReference(hash){
 document.querySelectorAll('a[href^="#"]:not(#data-download)').forEach(a=>a.addEventListener('click',e=>{if(openReference(a.getAttribute('href'))){e.preventDefault();try{history.replaceState(null,'',a.getAttribute('href'));}catch{}}}));
 addEventListener('hashchange',()=>openReference(location.hash));if(location.hash)openReference(location.hash);
 $('.brand').onclick=e=>{e.preventDefault();document.querySelector('[data-tab="lab"]').click();window.scrollTo({top:0,behavior:'instant'});};
-function controls(){for(const id of ['run','demo'])$('#'+id).disabled=!ready||busy;$('#halt').disabled=!busy;$('#code').readOnly=busy;$('#example').disabled=busy;}
+function controls(){for(const id of ['run','demo','slow'])$('#'+id).disabled=!ready||busy;$('#halt').disabled=!busy;$('#code').readOnly=busy;$('#example').disabled=busy;}
 function status(text,kind=''){$('#status').textContent=text;$('#status').dataset.kind=kind;}
 function renderLog(rows){
   $('#log').replaceChildren(...rows.map(r=>{const li=document.createElement('li'),t=document.createElement('time');t.textContent=r.day.toFixed(1).padStart(5,' ')+'일';li.append(t,document.createTextNode(r.text));return li;}));
@@ -99,7 +101,7 @@ async function init(){
       workerURL=URL.createObjectURL(new Blob([await codeResponse.text()],{type:'text/javascript'}));
     }
     prepareScene(data);
-    worker=new Worker(workerURL);worker.onmessage=e=>receive(e.data);worker.onerror=e=>{busy=false;status('실행 환경 오류','error');$('#result').textContent=e.message||'이 브라우저에서 계산 스레드를 열지 못했다.';controls();};
+    worker=new Worker(workerURL);worker.onmessage=e=>{dhMark(e.data.slow&&e.data.type==='frame'?e.data.phys:0);receive(e.data);};worker.onerror=e=>{busy=false;status('실행 환경 오류','error');$('#result').textContent=e.message||'이 브라우저에서 계산 스레드를 열지 못했다.';controls();};
     worker.postMessage({type:'init',data});
     $('#data-download').href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'}));
     draw();
@@ -117,11 +119,11 @@ function prepareScene(d){
   for(let it=0;it<12;it++){const sum=centers.map(()=>[0,0,0]);for(const p of pts){let b=0,bd=1e9;centers.forEach((c,i)=>{const dd=(c[0]-p[0])**2+(c[1]-p[1])**2;if(dd<bd){bd=dd;b=i;}});sum[b][0]+=p[0];sum[b][1]+=p[1];sum[b][2]++;}centers=centers.map((c,i)=>sum[i][2]?[sum[i][0]/sum[i][2],sum[i][1]/sum[i][2],sum[i][2]]:c);}
   meadows=centers.filter(c=>c[2]>12).map((c,i)=>({x:c[0],y:c[1],r:60+Math.sqrt(c[2])*9,tone:i%4}));bg=null;
 }
-function run(){
-  if(!ready||busy)return;lastSource=$('#code').value;allSeries=[];archive=[];runIndex=0;series=[];chartPeak=0;sparks=[];ripples=[];contactTrails=[];drawChart();busy=true;$('#welcome').hidden=true;status('실험 중','running');$('#result').textContent='동현랭 명령을 실행하고 있다.';controls();
-  worker.postMessage({type:'run',code:lastSource});
+function run(e){const slowRun=e===true;
+  if(!ready||busy)return;lastSource=$('#code').value;allSeries=[];archive=[];runIndex=0;series=[];chartPeak=0;sparks=[];ripples=[];contactTrails=[];drawChart();busy=true;$('#welcome').hidden=true;status('실험 중','running');$('#result').textContent=slowRun?'동현랭 명령을 한 줄씩 천천히 실행하고 있다.':'동현랭 명령을 실행하고 있다.';controls();
+  worker.postMessage({type:'run',code:lastSource,slow:slowRun});
 }
-$('#run').onclick=run;$('#demo').onclick=run;$('#halt').onclick=()=>worker?.postMessage({type:'halt'});
+$('#run').onclick=run;$('#demo').onclick=run;$('#slow').onclick=()=>run(true);$('#halt').onclick=()=>worker?.postMessage({type:'halt'});
 $('#code').onkeydown=e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();run();}if(e.key==='Tab'&&!busy){e.preventDefault();const t=e.target,start=t.selectionStart;t.setRangeText('  ',start,t.selectionEnd,'end');codeChanged();}};
 function download(name,text,type){const a=document.createElement('a'),url=URL.createObjectURL(new Blob([text],{type}));a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 $('#save').onclick=()=>download('donghyunbil-experiment.dh',$('#code').value,'text/plain;charset=utf-8');
@@ -217,6 +219,6 @@ function drawChart(){
 window.render_game_to_text=()=>JSON.stringify({app:'동현빌',version:'0.3',busy,state:state?{day:state.day,clock:state.clock,night:state.night,counts:state.counts,cum:state.cum,pathogen:state.pathogenName,index:state.index}:null,coordinates:'960×720, x right, y down; sky strip 44px at top; 469 villagers at fixed positions'});
 let ticking=false;function animate(){if(ticking)return;ticking=true;const frame=()=>{draw();if(busy&&!reduced)requestAnimationFrame(frame);else{ticking=false;draw();drawChart();}};requestAnimationFrame(frame);}
 let chartTimer=0;const chartLoop=()=>{if(busy)drawChart();if(busy)chartTimer=setTimeout(chartLoop,500);};
-$('#run').addEventListener('click',()=>{animate();clearTimeout(chartTimer);chartLoop();});$('#demo').addEventListener('click',()=>{animate();clearTimeout(chartTimer);chartLoop();});
+$('#run').addEventListener('click',()=>{animate();clearTimeout(chartTimer);chartLoop();});$('#slow').addEventListener('click',()=>{animate();clearTimeout(chartTimer);chartLoop();});$('#demo').addEventListener('click',()=>{animate();clearTimeout(chartTimer);chartLoop();});
 new ResizeObserver(()=>{draw();drawChart();}).observe($('.observation'));document.fonts.ready.then(()=>{draw();drawChart();});
 draw();drawChart();init();

@@ -1,3 +1,4 @@
+let slow=false;
 /* 동현빌의 계산 스레드. 바뀌지 않은 동현랭 실행기가 출력한 정수 묶음만 마을에 전달한다. */
 let D,village,world,vm,running=false,runId=0,steps=0,pending=0,token='',packet=[],queue=[],logs=[],wallStart=0,sentSeries=0,nightHold=0,eventsBuffer=[],lastContacts=[];
 const arity={1:1,2:1,3:1,4:1,5:2,6:1,7:1,8:1,9:1,10:1,11:1};
@@ -74,24 +75,24 @@ function snapshot(type='frame',extra={}){
   const state={...world,time:village.time,day:village.dayIndex(),clock:village.clock(),night:village.isNight(),recordDay:village.recordDay(),counts:c,cum:village.cum,newToday:village.newToday,
     pathogenName:village.pathogen?.name||'',index:village.index,secondaryOfIndex:village.index?village.secondary[village.index]:0,pending,running};
   const series=village.series.slice(sentSeries);sentSeries=village.series.length;
-  postMessage({type,state,people,contacts:lastContacts,events:eventsBuffer,series,logs:logs.slice(-40),steps,line:vm?.currentLine||1,...extra});
+  postMessage({type,state,people,contacts:lastContacts,events:eventsBuffer,series,logs:logs.slice(-40),steps,line:vm?.currentLine||1,phys:vm&&!vm.done?(vm.stmts?.[vm.pc]?.phys||0):0,slow,...extra});
   eventsBuffer=[];
 }
 function fail(e){running=false;log('오류: '+e.message);snapshot('error',{error:e.message,line:e.line||vm?.currentLine,allSeries:village.series});}
 function loop(id){
-  if(!running||id!==runId)return;const t=performance.now();
+  if(!running||id!==runId)return;const t=performance.now(),wasPending=pending>0;
   try{
     if(pending>0)tick();
     else{
       let budget=0;
-      while(running&&pending<=0&&!vm.done&&budget++<400){vm.step(1);steps++;assert(steps<=300000,'30만 문장 한도에 도달했다. 반복 조건을 확인하라.');}
+      while(running&&pending<=0&&!vm.done&&budget++<(slow?1:400)){vm.step(1);steps++;assert(steps<=300000,'30만 문장 한도에 도달했다. 반복 조건을 확인하라.');}
       if(vm.done){
         if(vm.halted){running=false;packet=[];token='';pending=0;log('오겡끼데스까 · 종료');}
         else{if(token){const t=token;token='';accept(t);}assert(!packet.length,'명령 인수가 부족하다. 조작 규약을 확인하라.');if(pending<=0){running=false;log('프로그램 완료 · 동현이구나');}}
       }
     }
     snapshot(running?'frame':'done',running?{}:{allSeries:village.series,wallMs:performance.now()-wallStart});
-    if(running)setTimeout(()=>loop(id),Math.max(0,FRAME_MS-(performance.now()-t)));
+    if(running)setTimeout(()=>loop(id),Math.max(0,(slow&&!wasPending?260:FRAME_MS)-(performance.now()-t)));
   }catch(e){fail(e);}
 }
 onmessage=({data:m})=>{
@@ -104,7 +105,7 @@ onmessage=({data:m})=>{
     if(m.type==='run'){
       assert(typeof m.code==='string'&&m.code.length<=100000,'코드는 100,000자까지다.');
       const candidate=new Donghyun.VM(m.code,{write,readInt:()=>{assert(queue.length>0,'명령 8로 관측을 요청한 뒤 꽥꽥으로 읽어라.');return queue.shift();}});
-      runId++;resetWorld(1);logs=[];steps=0;packet=[];token='';pending=0;vm=candidate;running=true;wallStart=performance.now();log('동현랭 프로그램 시작');snapshot();loop(runId);
+      runId++;resetWorld(1);logs=[];steps=0;packet=[];token='';pending=0;vm=candidate;slow=!!m.slow;running=true;wallStart=performance.now();log('동현랭 프로그램 시작');snapshot();loop(runId);
     }
   }catch(e){fail(e);}
 };
