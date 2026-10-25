@@ -172,3 +172,35 @@ a.series-item:focus-visible{outline:3px solid #a5791c;outline-offset:3px}
 /* Editor code follows Donghyun-lang at every width: 15px/1.7, and 13.5px on phones (<=480px). */
 #code,#lines{font-size:15px;line-height:1.7}
 @media(max-width:480px){#code,#lines{font-size:13.5px}}
+
+/* 동현랭 편집기와 같은 문법 색 표시 */
+:root{--hl-duck:#f2b705;--hl-line7:#6b7400;--hl-halt:#b8321f;--hl-num:#9a5b00;--hl-var:#1d5d8a;--hl-io:#7a3fa0;--hl-comment:#9a8f80}
+[data-theme=dark]{--hl-line7:#b4c03a;--hl-halt:#f0705c;--hl-num:#f0b35a;--hl-var:#7cc0f0;--hl-io:#d39af5;--hl-comment:#7d7266}
+.code-area{position:relative;flex:1;width:0;min-width:0}
+.code-area>#code{position:absolute;inset:0;width:100%;height:100%;color:transparent;-webkit-text-fill-color:transparent;caret-color:var(--ink);background:transparent}
+.code-area>#code::selection{background:rgba(29,93,138,.25);color:transparent}
+#hl{position:absolute;inset:0;margin:0;overflow:hidden;white-space:pre;pointer-events:none;color:var(--ink)}
+#hl .ln{display:block}
+#hl .t-frame{font-weight:700;text-decoration:underline;text-decoration-color:var(--hl-duck);text-decoration-thickness:3px;text-underline-offset:3px}
+#hl .t-num{color:var(--hl-num)}#hl .t-minus{color:var(--hl-halt)}#hl .t-var{color:var(--hl-var)}
+#hl .t-assign{color:var(--hl-var);font-weight:700}#hl .t-in,#hl .t-out{color:var(--hl-io);font-weight:700}
+#hl .t-ctl{color:var(--hl-line7);font-weight:700}#hl .t-op{color:var(--hl-halt);font-weight:700}
+#hl .t-halt{color:#fff;background:var(--hl-halt);border-radius:3px;font-weight:700}
+#hl .t-cmt{color:var(--hl-comment);font-style:normal}
+
+/* 동현랭 편집기 모양: 위쪽 머리줄에 예제·실행·중단 */
+.dh-panel{background:var(--paper);border:1px solid var(--line);border-radius:16px;box-shadow:0 1px 0 rgba(38,33,28,.06),0 8px 24px -12px rgba(38,33,28,.18);overflow:hidden;display:flex;flex-direction:column;margin:8px 0}
+[data-theme=dark] .dh-panel{box-shadow:0 1px 0 rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.6)}
+.dh-head{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.dh-head select{width:0;flex:1 1 140px;min-width:0;max-width:100%;min-height:0;margin:0;font-size:var(--text-sm);padding:.45em .6em;border-radius:6px}
+.dh-spacer{flex:1}
+.dh-btn{display:inline-flex;align-items:center;gap:.4em;min-height:0;font-size:var(--text-sm);font-weight:600;padding:.45em .9em;border-radius:6px;border:1px solid var(--line);background:var(--paper);color:var(--ink);white-space:nowrap}
+.dh-btn svg{width:15px;height:15px}
+.dh-btn kbd{font-family:var(--mono);font-size:.75rem;opacity:.7}
+.dh-run{background:#f2b705;border-color:#f2b705;color:#26211c}
+.dh-run:hover:not(:disabled){background:#ffc61a}
+.dh-halt{color:var(--hl-halt);border-color:color-mix(in srgb,var(--hl-halt) 40%,transparent)}
+.dh-halt:hover:not(:disabled){background:color-mix(in srgb,var(--hl-halt) 10%,transparent)}
+.dh-panel .editor,.dh-panel .code-wrap{border:0;border-radius:0;margin:0}
+.dh-status{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin:0;padding:8px 16px;border-top:1px solid var(--line);font-size:var(--text-xs);color:var(--muted)}
+@media(max-width:480px){.dh-head{padding:10px 12px}.dh-head select{flex:1 1 100%}.dh-btn kbd{display:none}}
