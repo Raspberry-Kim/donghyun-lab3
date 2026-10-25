@@ -209,3 +209,8 @@ a.series-item:focus-visible{outline:3px solid #a5791c;outline-offset:3px}
 :root{--hl-current:rgba(242,183,5,.28)}[data-theme=dark]{--hl-current:rgba(242,183,5,.18)}
 .dh-slow{padding:.45em .55em}
 #hl .ln.cur{background:var(--hl-current);box-shadow:-12px 0 0 var(--hl-current),12px 0 0 var(--hl-current);border-radius:3px}
+
+/* 천천히: 눌린 상태 표시(점멸). 다시 누르면 원래 속도 */
+@keyframes dhBlink{0%,100%{background:#f2b705;border-color:#f2b705;color:#26211c}50%{background:var(--paper);border-color:#f2b705;color:var(--ink)}}
+.dh-slow[aria-pressed=true]{background:#f2b705;border-color:#f2b705;color:#26211c;animation:dhBlink 1s ease-in-out infinite}
+@media(prefers-reduced-motion:reduce){.dh-slow[aria-pressed=true]{animation:none}}
