@@ -28,5 +28,7 @@ const version=require('./package.json').version.split('.').slice(0,2).join('.');
 fs.writeFileSync(path.join(root,'index.html'),html);fs.writeFileSync(path.join(root,`동현빌-v${version}.html`),html);
 const {examples}=require('./src/examples.js');fs.mkdirSync(path.join(root,'examples'),{recursive:true});
 for(const f of fs.readdirSync(path.join(root,'examples')))if(/^\d\d-[a-z-]+\.dh$/.test(f))fs.unlinkSync(path.join(root,'examples',f));
-examples.forEach((e,i)=>fs.writeFileSync(path.join(root,'examples',String(i+1).padStart(2,'0')+'-'+e.id+'.dh'),e.code));
+// 내려받는 .dh 예제도 편집기와 같은 규칙으로 들여쓴다: 시작·끝 줄은 맨 앞, 명령은 2칸, 따로 줄에 있는 주석은 3칸
+const dhIndent=t=>t.split('\n').map(l=>{const b=l.replace(/^[ \t]+/,'');if(!b)return '';if(b.startsWith('ㅋㅋ'))return '   '+b;const s=b.split('~')[0].replace(/ㅋㅋ.*$/,'').trim();return (s==='나는 동현이냐?'||s==='동현이구나'?'':'  ')+b;}).join('\n');
+examples.forEach((e,i)=>fs.writeFileSync(path.join(root,'examples',String(i+1).padStart(2,'0')+'-'+e.id+'.dh'),dhIndent(e.code)+'\n'));
 console.log(JSON.stringify({version,workerFile,appFile,dataFile,bytes:Buffer.byteLength(html),examples:examples.length}));

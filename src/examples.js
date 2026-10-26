@@ -11,7 +11,7 @@ const block=(label,...ns)=>'ㅋㅋ '+label+'\n'+output(...ns);
 function asm(parts){
   const lines=['나는 동현이냐?'],labels={};let count=1;
   for(const p of parts){if(typeof p==='object'){labels[p.label]=count+1;continue;}for(const l of p.split('\n')){lines.push(l);count+=l.split('~').length;}}
-  lines.push('동현이구나','');
+  lines.push('동현이구나');
   return lines.map(l=>l.replace(/@(\w+)/g,(_,k)=>{if(!labels[k])throw Error('없는 표시 '+k);return expression(labels[k]);})).join('\n');
 }
 const wrap=a=>asm(a);
