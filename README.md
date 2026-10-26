@@ -73,7 +73,7 @@
 | 경로 | 내용 |
 |---|---|
 | `index.html` | 배포용 단일 파일. 그대로 열면 된다 |
-| `src/` | 앱 소스(`app.js` 화면, `village.js` 전파 모형, `worker.js` 동현랭 명령 처리, `examples.js` 예제, `donghyun.js` 동현랭 실행기 v1.52) |
+| `src/` | 앱 소스(`app.js` 화면, `village.js` 전파 모형, `worker.js` 동현랭 명령 처리, `examples.js` 예제, `donghyun.js` 동현랭 실행기 v1.53) |
 | `data/raw/` | Haslemere 원 데이터와 원 README. `data/village.json`은 앱용 가공 파일 |
 | `tools/build-village.cjs` | 원 데이터 검사·압축·배치·보정 도구 (`npm run data`) |
 | `examples/` | 예제 `.dh` 파일 |

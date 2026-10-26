@@ -2,7 +2,7 @@
 
 동현빌은 동현랭 프로그램이 출력한 정수만 읽는다. 버튼, 슬라이더, 드래그로는 마을에 아무 일도 일어나지 않는다. 이 문서는 어떤 정수가 어떤 명령이 되는지, 무엇을 읽을 수 있는지, 어디까지가 실험의 범위인지를 정한다.
 
-동현랭 문법 자체는 [동현랭 명세](https://github.com/Raspberry-Kim/donghyun-lang/blob/main/SPEC.md)를 따른다. 동현빌은 실행기(`src/donghyun.js`, v1.52)를 고치지 않고 그대로 쓴다.
+동현랭 문법 자체는 [동현랭 명세](https://github.com/Raspberry-Kim/donghyun-lang/blob/main/SPEC.md)를 따른다. 동현빌은 실행기(`src/donghyun.js`, v1.53)를 고치지 않고 그대로 쓴다.
 
 ## 전송 형식
 

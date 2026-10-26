@@ -28,15 +28,15 @@ function dhRunningNotice(){$('#result').textContent=dhSlowOn?'동현랭 명령�
 function dhMark(n){if(n===dhCur)return;dhCur=n;dhHl.querySelectorAll('.ln.cur').forEach(e=>e.classList.remove('cur'));if(n>0)dhHl.children[n-1]?.classList.add('cur');}
 function dhHighlight(){dhCur=0;dhMetrics();dhHl.innerHTML=dhCode.value.split('\n').map(l=>`<span class="ln">${dhLine(l)||' '}</span>`).join('')+'<span class="ln"> </span>';dhSync();}
 dhCode.addEventListener('scroll',dhSync);addEventListener('resize',dhHighlight);
-function dhIndentComments(){
-  const text=dhCode.value,starts=[...text.matchAll(/^ㅋㅋ/gm)].map(m=>m.index);if(!starts.length)return;
+function dhIndentCode(){
+  const text=dhCode.value,lines=text.split('\n'),lead=l=>l.length-l.replace(/^[ \t]+/,'').length;
+  const next=lines.map(l=>{const b=l.slice(lead(l));if(!b)return '';if(b.startsWith('ㅋㅋ'))return '   '+b;const s=b.split('~')[0].replace(/ㅋㅋ.*$/,'').trim();return (s==='나는 동현이냐?'||s==='동현이구나'?'':'  ')+b;});
   const {selectionStart:a,selectionEnd:b,selectionDirection:direction,scrollTop:y,scrollLeft:x}=dhCode;
-  dhCode.value=text.replace(/^ㅋㅋ/gm,'  ㅋㅋ');
-  const shifted=p=>p+2*starts.filter(i=>i<=p).length;
-  dhCode.setSelectionRange(shifted(a),shifted(b),direction);dhCode.scrollTop=y;dhCode.scrollLeft=x;
+  const moved=p=>{let o=0,n=0;for(let i=0;i<lines.length;i++){const L=lines[i].length;if(p<=o+L){const c=p-o,ol=lead(lines[i]),nl=lead(next[i]);return n+Math.min(next[i].length,c<ol?nl:c-ol+nl);}o+=L+1;n+=next[i].length+1;}return n;};
+  const value=next.join('\n'),na=moved(a),nb=moved(b);if(value===text&&na===a&&nb===b)return;if(value!==text)dhCode.value=value;dhCode.setSelectionRange(na,nb,direction);dhCode.scrollTop=y;dhCode.scrollLeft=x;
 }
 dhCode.addEventListener('compositionend',()=>codeChanged());
-function codeChanged(e){if(!e?.isComposing)dhIndentComments();const n=$('#code').value.split('\n').length;$('#line-count').textContent=n+'줄';$('#lines').textContent=Array.from({length:n},(_,i)=>i+1).join('\n');dhHighlight();}
+function codeChanged(e){if(!e?.isComposing)dhIndentCode();const n=$('#code').value.split('\n').length;$('#line-count').textContent=n+'줄';$('#lines').textContent=Array.from({length:n},(_,i)=>i+1).join('\n');dhHighlight();}
 function selectExample(){
   const ex=examples.find(e=>e.id===$('#example').value);$('#code').value=ex.code;$('#example-note').textContent=ex.note;codeChanged();
   $('#welcome h3').textContent=ex.title.slice(5);
