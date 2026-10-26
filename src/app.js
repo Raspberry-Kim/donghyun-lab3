@@ -36,6 +36,14 @@ function dhIndentCode(){
   const value=next.join('\n'),na=moved(a),nb=moved(b);if(value===text&&na===a&&nb===b)return;if(value!==text)dhCode.value=value;dhCode.setSelectionRange(na,nb,direction);dhCode.scrollTop=y;dhCode.scrollLeft=x;
 }
 dhCode.addEventListener('compositionend',()=>codeChanged());
+// 커서가 들여쓰기 안에 놓이면 들여쓰기 뒤로 옮기고, 들여쓰기 바로 뒤에서 Backspace를 누르면 윗줄과 합친다
+function dhLead(){const a=dhCode.selectionStart,v=dhCode.value,ls=v.lastIndexOf('\n',a-1)+1,le=v.indexOf('\n',ls);return {a,ls,lead:/^[ \t]*/.exec(v.slice(ls,le<0?v.length:le))[0].length};}
+document.addEventListener('selectionchange',()=>{if(document.activeElement!==dhCode||dhCode.selectionStart!==dhCode.selectionEnd)return;const {a,ls,lead}=dhLead();if(a-ls<lead)dhCode.setSelectionRange(ls+lead,ls+lead);});
+dhCode.addEventListener('beforeinput',e=>{
+  const {a,ls,lead}=dhLead();
+  if(a!==dhCode.selectionEnd)return;
+  if(e.inputType==='deleteContentBackward'&&ls>0&&a>ls&&a-ls<=lead){e.preventDefault();dhCode.setRangeText('',ls-1,a,'end');codeChanged();}
+});
 function codeChanged(e){if(!e?.isComposing)dhIndentCode();const n=$('#code').value.split('\n').length;$('#line-count').textContent=n+'줄';$('#lines').textContent=Array.from({length:n},(_,i)=>i+1).join('\n');dhHighlight();}
 function selectExample(){
   const ex=examples.find(e=>e.id===$('#example').value);$('#code').value=ex.code;$('#example-note').textContent=ex.note;codeChanged();
