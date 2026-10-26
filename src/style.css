@@ -11,3 +11,6 @@
 
 /* 데스크톱 두 단: 모델 설명 아래 여백 없이 하단 줄을 동현초와 같은 간격으로 */
 @media(min-width:781px){.model-note{margin-bottom:0}}
+
+/* 휴대폰 한 단: 빈 실험 기록이 자리를 비워 두지 않도록 내용만큼 늘다가 원래 높이에서 멈춘다 */
+@media(max-width:780px){.coding-column .log-panel ol{height:auto;max-height:190px}}
