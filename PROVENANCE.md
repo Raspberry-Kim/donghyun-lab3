@@ -35,13 +35,13 @@ Kissler 등이 다큐멘터리 모의에 쓴 규칙을 따른다. 거리 d인 �
 
 홍역·백일해·인플루엔자는 다음과 같이 정했다.
 
-| 병원체 | R0 목표 | 잠복기 | 전염 기간 | 백신 효과 | 근거 |
+| 병원체 | R₀ 목표 | 잠복기 | 전염 기간 | 백신 효과 | 근거 |
 |---|---|---|---|---|---|
-| 홍역 | 15 | 10일 | 8일 | 97% | R0 12~18의 가운데값([Guerra 등 2017, 체계적 고찰](https://pubmed.ncbi.nlm.nih.gov/28757186/)). 노출 뒤 발진까지 약 14일, 발진 4일 전부터 4일 후까지 전염, MMR 2회 접종 효과 약 97%([CDC Pink Book, Measles](https://www.cdc.gov/pinkbook/hcp/table-of-contents/chapter-13-measles.html)) |
-| 백일해 | 5.5 | 8일 | 21일 | 85% | 유럽 5개국 자료의 R0 추정 5.5([Kretzschmar 등 2010](https://pmc.ncbi.nlm.nih.gov/articles/PMC2889930/)). 잠복 7~10일, 치료 없이 기침 시작 뒤 약 3주 전염, 접종 효과 80~90%([CDC Pink Book, Pertussis](https://www.cdc.gov/pinkbook/hcp/table-of-contents/chapter-16-pertussis.html)) |
-| 인플루엔자 | 1.3 | 1일 | 5일 | 50% | 계절 인플루엔자 R0 중앙값 1.28([Biggerstaff 등 2014, 체계적 고찰](https://pubmed.ncbi.nlm.nih.gov/25186370/)). 잠복 약 2일, 증상 하루 전부터 5~7일 전염, 백신 효과 40~60%([CDC Pink Book, Influenza](https://www.cdc.gov/pinkbook/hcp/table-of-contents/chapter-12-influenza.html), [CDC, How Flu Spreads](https://www.cdc.gov/flu/spread/index.html)) |
+| 홍역 | 15 | 10일 | 8일 | 97% | R₀ 12~18의 가운데값([Guerra 등 2017, 체계적 고찰](https://pubmed.ncbi.nlm.nih.gov/28757186/)). 노출 뒤 발진까지 약 14일, 발진 4일 전부터 4일 후까지 전염, MMR 2회 접종 효과 약 97%([CDC Pink Book, Measles](https://www.cdc.gov/pinkbook/hcp/table-of-contents/chapter-13-measles.html)) |
+| 백일해 | 5.5 | 8일 | 21일 | 85% | 유럽 5개국 자료의 R₀ 추정 5.5([Kretzschmar 등 2010](https://pmc.ncbi.nlm.nih.gov/articles/PMC2889930/)). 잠복 7~10일, 치료 없이 기침 시작 뒤 약 3주 전염, 접종 효과 80~90%([CDC Pink Book, Pertussis](https://www.cdc.gov/pinkbook/hcp/table-of-contents/chapter-16-pertussis.html)) |
+| 인플루엔자 | 1.3 | 1일 | 5일 | 50% | 계절 인플루엔자 R₀ 중앙값 1.28([Biggerstaff 등 2014, 체계적 고찰](https://pubmed.ncbi.nlm.nih.gov/25186370/)). 잠복 약 2일, 증상 하루 전부터 5~7일 전염, 백신 효과 40~60%([CDC Pink Book, Influenza](https://www.cdc.gov/pinkbook/hcp/table-of-contents/chapter-12-influenza.html), [CDC, How Flu Spreads](https://www.cdc.gov/flu/spread/index.html)) |
 
-**보정 방법.** 사흘치 기록에서 쌍 (i, j)마다 K_ij = Σ exp(−d/ρ)(50 m 이내 모든 기록)를 구한다. 전염 기간 D일 동안 사흘이 반복된다고 보면 j가 i를 감염시킬 확률은 1 − exp(−a·K_ij·D/3)이고, j의 기대 2차 감염 수는 이를 모든 i에 대해 더한 값이다. 469명 평균이 목표 R0가 되는 a를 이분법으로 찾는다. 결과는 홍역 1.073, 백일해 0.046038, 인플루엔자 0.015929다.
+**보정 방법.** 사흘치 기록에서 쌍 (i, j)마다 K_ij = Σ exp(−d/ρ)(50 m 이내 모든 기록)를 구한다. 전염 기간 D일 동안 사흘이 반복된다고 보면 j가 i를 감염시킬 확률은 1 − exp(−a·K_ij·D/3)이고, j의 기대 2차 감염 수는 이를 모든 i에 대해 더한 값이다. 469명 평균이 목표 R₀가 되는 a를 이분법으로 찾는다. 결과는 홍역 1.073, 백일해 0.046038, 인플루엔자 0.015929다.
 
 **왜 50 m인가.** 20 m 이내에서만 전파가 가능하다고 두면 한 사람이 사흘 동안 만나는 사람이 평균 13.6명이라 어떤 a로도 평균 2차 감염 15명을 만들 수 없다. 공개 기록의 범위인 50 m까지를 쓰고 거리가 멀수록 위험을 지수적으로 줄였다. 50 m는 "같은 건물이나 거리에 있었다"의 대리 지표이지 병원체가 날아가는 거리가 아니다. 홍역이 실내 공기로 퍼진다는 사실과 어울리는 가정이지만, 측정된 값은 아니다. 백일해·인플루엔자에도 같은 차단 거리를 두어 병원체 간 차이가 a·잠복기·전염 기간·백신 효과에서만 나오게 했다.
 
@@ -54,7 +54,7 @@ Kissler 등이 다큐멘터리 모의에 쓴 규칙을 따른다. 거리 d인 �
 ## 접종과 격리의 단순화
 
 - 접종은 효과(%)의 확률로 완전한 면역을 주고 나머지에는 아무 영향이 없는 "전부 아니면 전무" 모형이다. 접종 즉시 효과가 생긴다. 실제로는 면역이 생기기까지 시간이 걸리고, 부분 보호와 면역 감소가 있다.
-- 예제 04번의 1회 접종 효과 93%와 2회 접종 효과 97%는 [미국 CDC의 MMR 백신 자료](https://www.cdc.gov/measles/vaccines/index.html)를 따른다. R0 15에서 집단면역 문턱은 면역 인구 1 − 1/15 ≈ 93%다.
+- 예제 04번의 1회 접종 효과 93%와 2회 접종 효과 97%는 [미국 CDC의 MMR 백신 자료](https://www.cdc.gov/measles/vaccines/index.html)를 따른다. R₀ 15에서 집단면역 문턱은 면역 인구 1 − 1/15 ≈ 93%다.
 - 예제 12·13번의 인플루엔자 백신 효과 60%(2010–11)와 19%(2014–15)는 [미국 CDC의 시즌별 백신 효과 추정치](https://www.cdc.gov/flu-vaccines-work/php/effectiveness-studies/past-seasons-estimates.html)다. 2010–11년 유행 바이러스는 대부분 백신 성분과 항원이 같았고([CDC 2010–11 시즌 요약](https://archive.cdc.gov/www_cdc_gov/flu/pastseasons/1011season.htm)), 2014–15년에는 H3N2 대부분이 백신주에서 항원 변이를 보였다([CDC 2014–15 시즌 요약](https://archive.cdc.gov/www_cdc_gov/flu/pastseasons/1415season.htm)). 접종 인원 220명(약 47%)은 2014–15년 미국 생후 6개월 이상 접종률 47.1%([CDC FluVaxView 2015–16 보고의 비교값](http://medbox.iiab.me/modules/en-cdc/www.cdc.gov/flu/fluvaxview/coverage-1516estimates.htm))를 두 해에 같이 적용한 값이다.
 - 접종 규칙 2·4는 사흘간 4 m 이내 접촉 상대 수로 순서를 정한다. 실제 정책이 이런 순서를 알 수 있다는 뜻은 아니다.
 - 격리 정책 1은 전염이 시작되고 하루 뒤에 격리한다. 홍역처럼 발진 전부터 전염되는 병에서는 이미 나흘 가까이 전염한 뒤일 수 있다는 점이 그대로 결과에 드러난다. 정책 2의 접촉자 격리 14일은 병원체와 무관한 고정값이며, 검사·추적의 지연과 누락은 없다.

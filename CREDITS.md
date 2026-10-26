@@ -12,7 +12,7 @@
 
 ## 병원체 숫자의 출처
 
-- 홍역: Guerra FM 등. The basic reproduction number (R0) of measles: a systematic review. Lancet Infect Dis 2017. [PubMed](https://pubmed.ncbi.nlm.nih.gov/28757186/) · [CDC Pink Book, Measles](https://www.cdc.gov/pinkbook/hcp/table-of-contents/chapter-13-measles.html)
+- 홍역: Guerra FM 등. The basic reproduction number (R₀) of measles: a systematic review. Lancet Infect Dis 2017. [PubMed](https://pubmed.ncbi.nlm.nih.gov/28757186/) · [CDC Pink Book, Measles](https://www.cdc.gov/pinkbook/hcp/table-of-contents/chapter-13-measles.html)
 - 백일해: Kretzschmar M, Teunis PFM, Pebody RG. Incidence and reproduction numbers of pertussis. PLoS Med 2010. [PMC](https://pmc.ncbi.nlm.nih.gov/articles/PMC2889930/) · [CDC Pink Book, Pertussis](https://www.cdc.gov/pinkbook/hcp/table-of-contents/chapter-16-pertussis.html)
 - 인플루엔자: Biggerstaff M 등. Estimates of the reproduction number for seasonal, pandemic, and zoonotic influenza: a systematic review. BMC Infect Dis 2014. [PubMed](https://pubmed.ncbi.nlm.nih.gov/25186370/) · [CDC Pink Book, Influenza](https://www.cdc.gov/pinkbook/hcp/table-of-contents/chapter-12-influenza.html) · [CDC, How Flu Spreads](https://www.cdc.gov/flu/spread/index.html)
 - 접촉망 위의 유행 모의와 접촉자 추적: Firth JA 등. Using a real-world network to model localized COVID-19 control strategies. Nat Med 2020. [논문](https://www.nature.com/articles/s41591-020-1036-8)
