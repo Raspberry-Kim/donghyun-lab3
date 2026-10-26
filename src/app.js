@@ -24,6 +24,14 @@ function dhSync(){dhHl.scrollTop=dhCode.scrollTop;dhHl.scrollLeft=dhCode.scrollL
 function dhMetrics(){const cs=getComputedStyle(dhCode);for(const p of ['paddingTop','paddingRight','paddingBottom','paddingLeft','fontFamily','fontSize','lineHeight','tabSize','letterSpacing'])dhHl.style[p]=cs[p];}
 let dhCur=0,dhSlowOn=false;
 function dhSlowUI(v){dhSlowOn=v;const b=document.getElementById('slow');if(b)b.setAttribute('aria-pressed',String(v));}
+/* 10회 반복 실행: 실행 버튼을 열 번 이어 누른 것과 같다. 같은 코드를 다시 실행하므로 매번 새 시드를 쓴다. */
+let dhRepeatNo=0,dhRepeatTimer=0;const DH_REPEAT=10;
+function dhRepeatUI(){const b=document.getElementById('repeat10');if(!b)return;b.setAttribute('aria-pressed',String(dhRepeatNo>0));b.disabled=!ready||(busy&&!dhRepeatNo);}
+function dhRepeatStop(){dhRepeatNo=0;clearTimeout(dhRepeatTimer);dhRepeatUI();}
+function dhRepeatNote(){const r=document.getElementById('result');if(dhRepeatNo&&r)r.textContent=`10회 반복 ${dhRepeatNo}/${DH_REPEAT} · `+r.textContent;}
+function dhRepeatStart(){if(dhRepeatNo){dhRepeatStop();return;}if(!ready||busy)return;dhRepeatNo=1;run();if(busy){dhRepeatNote();dhRepeatUI();}else dhRepeatStop();}
+function dhRepeatAfter(type){if(!dhRepeatNo)return;dhRepeatNote();if(type!=='done'||dhRepeatNo>=DH_REPEAT){dhRepeatStop();return;}
+  dhRepeatTimer=setTimeout(()=>{if(!dhRepeatNo)return;dhRepeatNo++;run();if(busy){dhRepeatNote();dhRepeatUI();}else dhRepeatStop();},800);}
 function dhRunningNotice(){$('#result').textContent=dhSlowOn?'동현랭 명령을 한 줄씩 천천히 실행하고 있다.':'동현랭 명령을 실행하고 있다.';}
 function dhMark(n){if(n===dhCur)return;dhCur=n;dhHl.querySelectorAll('.ln.cur').forEach(e=>e.classList.remove('cur'));if(n>0)dhHl.children[n-1]?.classList.add('cur');}
 function dhHighlight(){dhCur=0;dhMetrics();dhHl.innerHTML=dhCode.value.split('\n').map(l=>`<span class="ln">${dhLine(l)||' '}</span>`).join('')+'<span class="ln"> </span>';dhSync();}
@@ -71,7 +79,7 @@ function openReference(hash){
 document.querySelectorAll('a[href^="#"]:not(#data-download)').forEach(a=>a.addEventListener('click',e=>{if(openReference(a.getAttribute('href'))){e.preventDefault();try{history.replaceState(null,'',a.getAttribute('href'));}catch{}}}));
 addEventListener('hashchange',()=>openReference(location.hash));if(location.hash)openReference(location.hash);
 $('.brand').onclick=e=>{e.preventDefault();document.querySelector('[data-tab="lab"]').click();window.scrollTo({top:0,behavior:'instant'});};
-function controls(){for(const id of ['run','demo'])$('#'+id).disabled=!ready||busy;$('#slow').disabled=!ready;$('#halt').disabled=!busy;$('#code').readOnly=busy;$('#example').disabled=busy;}
+function controls(){for(const id of ['run','demo'])$('#'+id).disabled=!ready||busy;$('#slow').disabled=!ready;$('#halt').disabled=!busy;$('#code').readOnly=busy;$('#example').disabled=busy;dhRepeatUI();}
 function status(text,kind=''){$('#status').textContent=text;$('#status').dataset.kind=kind;}
 function renderLog(rows){
   $('#log').replaceChildren(...rows.map(r=>{const li=document.createElement('li'),t=document.createElement('time');t.textContent=r.day.toFixed(1).padStart(5,' ')+'일';li.append(t,document.createTextNode(r.text));return li;}));
@@ -120,7 +128,7 @@ async function init(){
       workerURL=URL.createObjectURL(new Blob([await codeResponse.text()],{type:'text/javascript'}));
     }
     prepareScene(data);
-    worker=new Worker(workerURL);worker.onmessage=e=>{if(['done','error','halted'].includes(e.data.type))dhSlowUI(false);dhMark(e.data.slow&&e.data.type==='frame'?e.data.phys:0);receive(e.data);};worker.onerror=e=>{busy=false;status('실행 환경 오류','error');$('#result').textContent=e.message||'이 브라우저에서 계산 스레드를 열지 못했다.';controls();};
+    worker=new Worker(workerURL);worker.onmessage=e=>{if(['done','error','halted'].includes(e.data.type))dhSlowUI(false);dhMark(e.data.slow&&e.data.type==='frame'?e.data.phys:0);receive(e.data);if(['done','error','halted'].includes(e.data.type))dhRepeatAfter(e.data.type);};worker.onerror=e=>{busy=false;status('실행 환경 오류','error');$('#result').textContent=e.message||'이 브라우저에서 계산 스레드를 열지 못했다.';controls();};
     worker.postMessage({type:'init',data});
     $('#data-download').href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'}));
     draw();
@@ -145,7 +153,7 @@ function run(e){const slowRun=e===true;if(!ready||busy)return;dhSlowUI(slowRun);
   worker.postMessage({type:'run',code:lastSource,slow:slowRun,repeat});
   animate();clearTimeout(chartTimer);chartLoop();
 }
-$('#run').onclick=run;$('#demo').onclick=run;$('#slow').onclick=()=>{if(busy){dhSlowUI(!dhSlowOn);dhRunningNotice();worker.postMessage({type:'speed',slow:dhSlowOn});if(!dhSlowOn)dhMark(0);}else run(true);};$('#halt').onclick=()=>worker?.postMessage({type:'halt'});
+$('#run').onclick=run;$('#demo').onclick=run;$('#repeat10').onclick=dhRepeatStart;$('#slow').onclick=()=>{if(busy){dhSlowUI(!dhSlowOn);dhRunningNotice();worker.postMessage({type:'speed',slow:dhSlowOn});if(!dhSlowOn)dhMark(0);}else run(true);};$('#halt').onclick=()=>worker?.postMessage({type:'halt'});
 $('#code').onkeydown=e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();run();}if(e.key==='Tab'&&!busy){e.preventDefault();const t=e.target,start=t.selectionStart;t.setRangeText('  ',start,t.selectionEnd,'end');codeChanged();}};
 function download(name,text,type){const a=document.createElement('a'),url=URL.createObjectURL(new Blob([text],{type}));a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 $('#save').onclick=()=>download('donghyunbil-experiment.dh',$('#code').value,'text/plain;charset=utf-8');
@@ -154,7 +162,7 @@ $('.file-label').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault
 $('#open').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;if(busy){$('#result').textContent='중단한 뒤 파일을 열 수 있다.';e.target.value='';return;}if(f.size>400000){$('#result').textContent='파일이 너무 크다. 400 KB 이하의 동현랭 코드를 열어라.';return;}const t=await f.text();if(t.length>100000){$('#result').textContent='코드는 100,000자까지다.';return;}$('#code').value=t;codeChanged();$('#result').textContent='코드를 불러왔다. 실행하면 새 실험으로 시작한다.';e.target.value='';};
 $('#csv').onclick=()=>{
   if(!allSeries.length)return;const esc=v=>'"'+String(v??'').replaceAll('"','""')+'"';
-  const meta=[['# model','동현빌 0.36 / 469 people / real 5-minute proximity log repeated over 3 recorded days / stochastic SEIR, hourly samples'],['# data','Kissler et al., BBC Pandemic Haslemere dataset; https://github.com/skissler/haslemere'],['# limitation','Nights and homes are not recorded; three days are repeated; not a forecast for any real place'],['# seed',lastSeeds.join(' ')],['# code',lastSource]],keys=Object.keys(allSeries[0]);
+  const meta=[['# model','동현빌 0.37 / 469 people / real 5-minute proximity log repeated over 3 recorded days / stochastic SEIR, hourly samples'],['# data','Kissler et al., BBC Pandemic Haslemere dataset; https://github.com/skissler/haslemere'],['# limitation','Nights and homes are not recorded; three days are repeated; not a forecast for any real place'],['# seed',lastSeeds.join(' ')],['# code',lastSource]],keys=Object.keys(allSeries[0]);
   download('donghyunbil-observations.csv','\ufeff'+meta.map(r=>r.map(esc).join(',')).join('\n')+'\n'+keys.join(',')+'\n'+allSeries.map(s=>keys.map(k=>esc(s[k])).join(',')).join('\n'),'text/csv;charset=utf-8');
 };
 function setup(c,context,h){
@@ -238,7 +246,7 @@ function drawChart(){
   cc.restore();
   $('#chart-scale').textContent=`Y축 0–${ymax}명 · 자동 범위 · X축 ${span}일 · 한 시간 간격 표본`;
 }
-window.render_game_to_text=()=>JSON.stringify({app:'동현빌',version:'0.36',busy,state:state?{day:state.day,clock:state.clock,night:state.night,counts:state.counts,cum:state.cum,pathogen:state.pathogenName,index:state.index}:null,coordinates:'960×720, x right, y down; sky strip 44px at top; 469 villagers at fixed positions'});
+window.render_game_to_text=()=>JSON.stringify({app:'동현빌',version:'0.37',busy,state:state?{day:state.day,clock:state.clock,night:state.night,counts:state.counts,cum:state.cum,pathogen:state.pathogenName,index:state.index}:null,coordinates:'960×720, x right, y down; sky strip 44px at top; 469 villagers at fixed positions'});
 let ticking=false;function animate(){if(ticking)return;ticking=true;const frame=()=>{draw();if(busy&&!reduced)requestAnimationFrame(frame);else{ticking=false;draw();drawChart();}};requestAnimationFrame(frame);}
 let chartTimer=0;const chartLoop=()=>{if(busy)drawChart();if(busy)chartTimer=setTimeout(chartLoop,500);};
 new ResizeObserver(()=>{draw();drawChart();}).observe($('.observation'));document.fonts.ready.then(()=>{draw();drawChart();});
