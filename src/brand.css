@@ -107,8 +107,6 @@ th{background:var(--surface2)}
 .file-row{display:flex;gap:8px;border-top:1px solid var(--line);padding-top:12px;margin-top:8px}
 .file-row button,.file-row label{font:var(--text-xs) var(--body);padding:8px 12px;display:inline-flex;align-items:center;justify-content:center}
 .file-row label{cursor:pointer;border:1px solid var(--line);border-radius:6px;color:var(--ink);min-height:44px}
-.pipeline{border-top:1px solid var(--line);padding:20px 0;margin-top:24px;font-size:var(--text-xs);color:var(--muted);line-height:2}
-.pipeline b{font-weight:400;padding:0 3px}
 .file-label:focus-visible{outline:3px solid #a77915;outline-offset:3px}
 .chart-legend span{color:var(--muted)!important}
 .chart-legend span:before{background:var(--series)}

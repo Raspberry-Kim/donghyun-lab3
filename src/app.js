@@ -107,6 +107,7 @@ function receive(m){
   $('#m-v').innerHTML=c.V+' <small>명</small>';$('#m-v-note').textContent=c.V?`접종 · 면역 ${c.VI}명`:'접종';$('#m-q').innerHTML=c.Q+' <small>명</small>';
   $('#clock').textContent=(state?`${state.day}일째 ${state.clock}`:'0일째 07:00');$('#clock-note').textContent=state?.index?(state.night?`${DAYNAMES[state.recordDay]}요일 기록 · 밤, 접촉 기록 없음`:`${DAYNAMES[state.recordDay]}요일 기록 위를 지나는 중`):'모의 시간 · 밤은 건너뜀';$('.arena-wrap').classList.toggle('night',!!state?.night);$('#mode').textContent=describe(state);$('#cum-count').textContent='누적 감염 '+(state?.cum||0)+'명';
   $('#step-count').textContent=(m.steps||0).toLocaleString()+'문장';
+  if(m.seeds)lastSeeds=m.seeds;
   if(m.logs?.length)renderLog(m.logs);$('#csv').disabled=!allSeries.length||busy;controls();if(!busy){draw();drawChart();}
 }
 async function init(){
@@ -137,9 +138,11 @@ function prepareScene(d){
   for(let it=0;it<12;it++){const sum=centers.map(()=>[0,0,0]);for(const p of pts){let b=0,bd=1e9;centers.forEach((c,i)=>{const dd=(c[0]-p[0])**2+(c[1]-p[1])**2;if(dd<bd){bd=dd;b=i;}});sum[b][0]+=p[0];sum[b][1]+=p[1];sum[b][2]++;}centers=centers.map((c,i)=>sum[i][2]?[sum[i][0]/sum[i][2],sum[i][1]/sum[i][2],sum[i][2]]:c);}
   meadows=centers.filter(c=>c[2]>12).map((c,i)=>({x:c[0],y:c[1],r:60+Math.sqrt(c[2])*9,tone:i%4}));bg=null;
 }
+let prevRunCode=null,lastSeeds=[];
 function run(e){const slowRun=e===true;if(!ready||busy)return;dhSlowUI(slowRun);
   if(!ready||busy)return;lastSource=$('#code').value;allSeries=[];archive=[];runIndex=0;series=[];chartPeak=0;sparks=[];ripples=[];contactTrails=[];drawChart();busy=true;$('#welcome').hidden=true;status('실험 중','running');$('#result').textContent=slowRun?'동현랭 명령을 한 줄씩 천천히 실행하고 있다.':'동현랭 명령을 실행하고 있다.';controls();
-  worker.postMessage({type:'run',code:lastSource,slow:slowRun});
+  const repeat=lastSource===prevRunCode;prevRunCode=lastSource;
+  worker.postMessage({type:'run',code:lastSource,slow:slowRun,repeat});
   animate();clearTimeout(chartTimer);chartLoop();
 }
 $('#run').onclick=run;$('#demo').onclick=run;$('#slow').onclick=()=>{if(busy){dhSlowUI(!dhSlowOn);dhRunningNotice();worker.postMessage({type:'speed',slow:dhSlowOn});if(!dhSlowOn)dhMark(0);}else run(true);};$('#halt').onclick=()=>worker?.postMessage({type:'halt'});
@@ -151,7 +154,7 @@ $('.file-label').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault
 $('#open').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;if(busy){$('#result').textContent='중단한 뒤 파일을 열 수 있다.';e.target.value='';return;}if(f.size>400000){$('#result').textContent='파일이 너무 크다. 400 KB 이하의 동현랭 코드를 열어라.';return;}const t=await f.text();if(t.length>100000){$('#result').textContent='코드는 100,000자까지다.';return;}$('#code').value=t;codeChanged();$('#result').textContent='코드를 불러왔다. 실행하면 새 실험으로 시작한다.';e.target.value='';};
 $('#csv').onclick=()=>{
   if(!allSeries.length)return;const esc=v=>'"'+String(v??'').replaceAll('"','""')+'"';
-  const meta=[['# model','동현빌 0.34 / 469 people / real 5-minute proximity log repeated over 3 recorded days / stochastic SEIR, hourly samples'],['# data','Kissler et al., BBC Pandemic Haslemere dataset; https://github.com/skissler/haslemere'],['# limitation','Nights and homes are not recorded; three days are repeated; not a forecast for any real place'],['# code',lastSource]],keys=Object.keys(allSeries[0]);
+  const meta=[['# model','동현빌 0.36 / 469 people / real 5-minute proximity log repeated over 3 recorded days / stochastic SEIR, hourly samples'],['# data','Kissler et al., BBC Pandemic Haslemere dataset; https://github.com/skissler/haslemere'],['# limitation','Nights and homes are not recorded; three days are repeated; not a forecast for any real place'],['# seed',lastSeeds.join(' ')],['# code',lastSource]],keys=Object.keys(allSeries[0]);
   download('donghyunbil-observations.csv','\ufeff'+meta.map(r=>r.map(esc).join(',')).join('\n')+'\n'+keys.join(',')+'\n'+allSeries.map(s=>keys.map(k=>esc(s[k])).join(',')).join('\n'),'text/csv;charset=utf-8');
 };
 function setup(c,context,h){
@@ -235,7 +238,7 @@ function drawChart(){
   cc.restore();
   $('#chart-scale').textContent=`Y축 0–${ymax}명 · 자동 범위 · X축 ${span}일 · 한 시간 간격 표본`;
 }
-window.render_game_to_text=()=>JSON.stringify({app:'동현빌',version:'0.34',busy,state:state?{day:state.day,clock:state.clock,night:state.night,counts:state.counts,cum:state.cum,pathogen:state.pathogenName,index:state.index}:null,coordinates:'960×720, x right, y down; sky strip 44px at top; 469 villagers at fixed positions'});
+window.render_game_to_text=()=>JSON.stringify({app:'동현빌',version:'0.36',busy,state:state?{day:state.day,clock:state.clock,night:state.night,counts:state.counts,cum:state.cum,pathogen:state.pathogenName,index:state.index}:null,coordinates:'960×720, x right, y down; sky strip 44px at top; 469 villagers at fixed positions'});
 let ticking=false;function animate(){if(ticking)return;ticking=true;const frame=()=>{draw();if(busy&&!reduced)requestAnimationFrame(frame);else{ticking=false;draw();drawChart();}};requestAnimationFrame(frame);}
 let chartTimer=0;const chartLoop=()=>{if(busy)drawChart();if(busy)chartTimer=setTimeout(chartLoop,500);};
 new ResizeObserver(()=>{draw();drawChart();}).observe($('.observation'));document.fonts.ready.then(()=>{draw();drawChart();});

@@ -15,7 +15,7 @@ function asm(parts){
   return lines.map(l=>l.replace(/@(\w+)/g,(_,k)=>{if(!labels[k])throw Error('없는 표시 '+k);return expression(labels[k]);})).join('\n');
 }
 const wrap=a=>asm(a);
-const reset=(seed=7)=>block('같은 시드로 마을을 초기화한다',1,seed);
+const reset=(seed=7)=>block('처음은 시드 '+seed+', 다시 실행하면 새 시드로 마을을 초기화한다',1,seed);
 const pathogen=(id,name)=>block('병원체: '+name,2,id);
 const index=(id,label)=>block(label||(id?`첫 환자 ${id}번`:'첫 환자를 무작위로 고른다'),3,id);
 const days=(n,label)=>block(label||`${n}일 동안 지켜본다`,7,n);

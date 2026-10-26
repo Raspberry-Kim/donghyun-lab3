@@ -20,6 +20,12 @@ check('Layout keeps 469 people apart and inside the frame',()=>{const L=data.lay
 function run(pid,days,seed,setup){const v=new Village(data);v.reset(seed);v.setPathogen(pid);if(setup)setup(v);const idx=v.setIndex(0);for(let d=0;d<days;d++){for(let s=0;s<192;s++)v.step();v.skipNight();}return {v,idx,counts:v.counts()};}
 check('Same seed reproduces the same outbreak',()=>{const a=run(1,40,11),b=run(1,40,11);assert.strictEqual(a.idx,b.idx);assert.deepStrictEqual(a.counts,b.counts);assert.deepStrictEqual([...a.v.state],[...b.v.state]);});
 check('Different seeds differ',()=>{const a=run(1,40,1),b=run(1,40,2);assert(a.v.cum!==b.v.cum||a.idx!==b.idx);});
+check('Same code run again draws a new random seed; equal seeds in one program stay equal',()=>{
+  const code=examples.find(e=>e.id==='isolation').code,runOnce=repeat=>{const {ctx,queue,msgs}=makeContext();ctx.onmessage({data:{type:'init',data}});ctx.onmessage({data:{type:'run',code,repeat}});let n=0;while(queue.length){queue.shift()();if(++n>3e6)throw Error('loop');}return msgs.at(-1);};
+  const first=runOnce(false),again=runOnce(true);assert(first.seeds.length>=2&&first.seeds.every(s=>s===first.seeds[0]));
+  assert.strictEqual(again.seeds.length,first.seeds.length);assert(again.seeds.every(s=>s===again.seeds[0]));assert.notStrictEqual(again.seeds[0],first.seeds[0]);
+  assert.strictEqual(JSON.stringify(runOnce(false).seeds),JSON.stringify(first.seeds));
+});
 check('Calibrated amplitude gives mean secondary infections near target R0',()=>{
   for(const p of data.pathogens.filter(p=>p.R0)){
     const rho=p.rho,K=new Map(),v=new Village(data);

@@ -8,6 +8,11 @@ const range=(x,a,b,name)=>assert(Number.isSafeInteger(x)&&x>=a&&x<=b,`${name}: $
 const RULES={1:'무작위',2:'접촉이 많은 사람부터',3:'첫 환자 주변 고리',4:'접촉이 적은 사람부터'};
 const ISO={0:'격리 없음',1:'증상자 격리(전염 시작 하루 뒤)',2:'증상자 격리 + 가까운 접촉자 14일 격리'};
 function log(text){logs.push({day:village?village.time/DAY:0,text});if(logs.length>400)logs.shift();}
+/* Seed: the first run uses the seed written in code. Running the same code again shifts every seed by one random offset,
+   so a repeat run draws new luck while seeds that are equal inside one program stay equal. */
+let seedOffset=0,seedsUsed=[];
+function pickSeedOffset(){const u=new Uint32Array(1);if(typeof crypto!=='undefined'&&crypto.getRandomValues)crypto.getRandomValues(u);else u[0]=Math.floor(Math.random()*4294967296);return 1+u[0]%2147483646;}
+function runSeed(s){return seedOffset?(s-1+seedOffset)%2147483647+1:s;}
 function resetWorld(seed){
   village.reset(seed);
   world={seed,speed:2,tags:[],pathogen:null,index:0,lastEvents:0,finished:false,ended:false,isolationMode:0,ve:null,vaccinations:0,totalDays:0};
@@ -30,7 +35,7 @@ const needPathogen=()=>assert(village.pathogen,'먼저 명령 2로 병원체를 
 const notStarted=what=>assert(village.time===0,`시간이 흐른 뒤에는 ${what}을 바꿀 수 없다. 명령 1로 초기화하라.`);
 function command(op,a){
   switch(op){
-    case 1:range(a[0],1,2147483647,'시드');resetWorld(a[0]);log('마을 초기화 · 시드 '+a[0]);break;
+    case 1:{range(a[0],1,2147483647,'시드');const s=runSeed(a[0]);resetWorld(s);seedsUsed.push(s);log('마을 초기화 · 시드 '+s+(seedOffset?` (다시 실행 · 코드의 시드 ${a[0]} 대신)`:''));break;}
     case 2:{range(a[0],1,4,'병원체 번호');notStarted('병원체');village.setPathogen(a[0]);const p=village.pathogen;world.pathogen=p.id;
       log(`병원체 ${p.id} ${p.name} · 잠복 ${fmtDays(p.latentSteps)} · 전염 ${fmtDays(p.infectiousSteps)} · 기본 백신 효과 ${p.ve}%`);break;}
     case 3:{range(a[0],0,469,'첫 환자 번호');needPathogen();notStarted('첫 환자');const i=village.setIndex(a[0]);world.index=i;log(`첫 환자 ${i}번 (${a[0]===0?'무작위':'지정'}) · 사흘간 4 m 이내 접촉 상대 ${village.degree[i-1]}명`);break;}
@@ -75,7 +80,7 @@ function snapshot(type='frame',extra={}){
   const state={...world,time:village.time,day:village.dayIndex(),clock:village.clock(),night:village.isNight(),recordDay:village.recordDay(),counts:c,cum:village.cum,newToday:village.newToday,
     pathogenName:village.pathogen?.name||'',index:village.index,secondaryOfIndex:village.index?village.secondary[village.index]:0,pending,running};
   const series=village.series.slice(sentSeries);sentSeries=village.series.length;
-  postMessage({type,state,people,contacts:lastContacts,events:eventsBuffer,series,logs:logs.slice(-40),steps,line:vm?.currentLine||1,phys:vm&&!vm.done?(vm.stmts?.[vm.pc]?.phys||0):0,slow,...extra});
+  postMessage({type,state,people,contacts:lastContacts,events:eventsBuffer,series,logs:logs.slice(-40),steps,line:vm?.currentLine||1,phys:vm&&!vm.done?(vm.stmts?.[vm.pc]?.phys||0):0,slow,seeds:seedsUsed.length?seedsUsed:[world.seed],...extra});
   eventsBuffer=[];
 }
 function fail(e){running=false;log('오류: '+e.message);snapshot('error',{error:e.message,line:e.line||vm?.currentLine,allSeries:village.series});}
@@ -106,7 +111,7 @@ onmessage=({data:m})=>{
     if(m.type==='run'){
       assert(typeof m.code==='string'&&m.code.length<=100000,'코드는 100,000자까지다.');
       const candidate=new Donghyun.VM(m.code,{write,readInt:()=>{assert(queue.length>0,'명령 8로 관측을 요청한 뒤 꽥꽥으로 읽어라.');return queue.shift();}});
-      runId++;resetWorld(1);logs=[];steps=0;packet=[];token='';pending=0;vm=candidate;slow=!!m.slow;running=true;wallStart=performance.now();log('동현랭 프로그램 시작');snapshot();loop(runId);
+      runId++;seedOffset=m.repeat?pickSeedOffset():0;seedsUsed=[];resetWorld(runSeed(1));logs=[];steps=0;packet=[];token='';pending=0;vm=candidate;slow=!!m.slow;running=true;wallStart=performance.now();log(seedOffset?'동현랭 프로그램 시작 · 같은 코드를 다시 실행해 새 시드를 쓴다':'동현랭 프로그램 시작');snapshot();loop(runId);
     }
   }catch(e){fail(e);}
 };
