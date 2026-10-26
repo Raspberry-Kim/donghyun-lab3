@@ -65,7 +65,7 @@ class Village{
     return this._close=m;
   }
   counts(){
-    const c={S:0,E:0,I:0,R:0,V:0,VI:0,Q:0};for(let i=1;i<=this.N;i++){const s=this.state[i];if(s===S)c.S++;else if(s===E)c.E++;else if(s===I)c.I++;else c.R++;if(this.vaccinated[i])c.V++;if(this.immune[i])c.VI++;if(this.isolated[i])c.Q++;}
+    const c={S:0,E:0,I:0,R:0,V:0,VI:0,Q:0};for(let i=1;i<=this.N;i++){const s=this.state[i];if(s===S){if(!this.immune[i])c.S++;}else if(s===E)c.E++;else if(s===I)c.I++;else c.R++;if(this.vaccinated[i])c.V++;if(this.immune[i])c.VI++;if(this.isolated[i])c.Q++;}
     return c;
   }
   dayIndex(){return Math.floor(this.time/DAY);}

@@ -24,10 +24,19 @@ function dhSync(){dhHl.scrollTop=dhCode.scrollTop;dhHl.scrollLeft=dhCode.scrollL
 function dhMetrics(){const cs=getComputedStyle(dhCode);for(const p of ['paddingTop','paddingRight','paddingBottom','paddingLeft','fontFamily','fontSize','lineHeight','tabSize','letterSpacing'])dhHl.style[p]=cs[p];}
 let dhCur=0,dhSlowOn=false;
 function dhSlowUI(v){dhSlowOn=v;const b=document.getElementById('slow');if(b)b.setAttribute('aria-pressed',String(v));}
+function dhRunningNotice(){$('#result').textContent=dhSlowOn?'동현랭 명령을 한 줄씩 천천히 실행하고 있다.':'동현랭 명령을 실행하고 있다.';}
 function dhMark(n){if(n===dhCur)return;dhCur=n;dhHl.querySelectorAll('.ln.cur').forEach(e=>e.classList.remove('cur'));if(n>0)dhHl.children[n-1]?.classList.add('cur');}
 function dhHighlight(){dhCur=0;dhMetrics();dhHl.innerHTML=dhCode.value.split('\n').map(l=>`<span class="ln">${dhLine(l)||' '}</span>`).join('')+'<span class="ln"> </span>';dhSync();}
 dhCode.addEventListener('scroll',dhSync);addEventListener('resize',dhHighlight);
-function codeChanged(){const n=$('#code').value.split('\n').length;$('#line-count').textContent=n+'줄';$('#lines').textContent=Array.from({length:n},(_,i)=>i+1).join('\n');dhHighlight();}
+function dhIndentComments(){
+  const text=dhCode.value,starts=[...text.matchAll(/^ㅋㅋ/gm)].map(m=>m.index);if(!starts.length)return;
+  const {selectionStart:a,selectionEnd:b,selectionDirection:direction,scrollTop:y,scrollLeft:x}=dhCode;
+  dhCode.value=text.replace(/^ㅋㅋ/gm,'  ㅋㅋ');
+  const shifted=p=>p+2*starts.filter(i=>i<=p).length;
+  dhCode.setSelectionRange(shifted(a),shifted(b),direction);dhCode.scrollTop=y;dhCode.scrollLeft=x;
+}
+dhCode.addEventListener('compositionend',()=>codeChanged());
+function codeChanged(e){if(!e?.isComposing)dhIndentComments();const n=$('#code').value.split('\n').length;$('#line-count').textContent=n+'줄';$('#lines').textContent=Array.from({length:n},(_,i)=>i+1).join('\n');dhHighlight();}
 function selectExample(){
   const ex=examples.find(e=>e.id===$('#example').value);$('#code').value=ex.code;$('#example-note').textContent=ex.note;codeChanged();
   $('#welcome h3').textContent=ex.title.slice(5);
@@ -123,8 +132,9 @@ function prepareScene(d){
 function run(e){const slowRun=e===true;if(!ready||busy)return;dhSlowUI(slowRun);
   if(!ready||busy)return;lastSource=$('#code').value;allSeries=[];archive=[];runIndex=0;series=[];chartPeak=0;sparks=[];ripples=[];contactTrails=[];drawChart();busy=true;$('#welcome').hidden=true;status('실험 중','running');$('#result').textContent=slowRun?'동현랭 명령을 한 줄씩 천천히 실행하고 있다.':'동현랭 명령을 실행하고 있다.';controls();
   worker.postMessage({type:'run',code:lastSource,slow:slowRun});
+  animate();clearTimeout(chartTimer);chartLoop();
 }
-$('#run').onclick=run;$('#demo').onclick=run;$('#slow').onclick=()=>{if(busy){dhSlowUI(!dhSlowOn);worker.postMessage({type:'speed',slow:dhSlowOn});if(!dhSlowOn)dhMark(0);}else run(true);};$('#halt').onclick=()=>worker?.postMessage({type:'halt'});
+$('#run').onclick=run;$('#demo').onclick=run;$('#slow').onclick=()=>{if(busy){dhSlowUI(!dhSlowOn);dhRunningNotice();worker.postMessage({type:'speed',slow:dhSlowOn});if(!dhSlowOn)dhMark(0);}else run(true);};$('#halt').onclick=()=>worker?.postMessage({type:'halt'});
 $('#code').onkeydown=e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();run();}if(e.key==='Tab'&&!busy){e.preventDefault();const t=e.target,start=t.selectionStart;t.setRangeText('  ',start,t.selectionEnd,'end');codeChanged();}};
 function download(name,text,type){const a=document.createElement('a'),url=URL.createObjectURL(new Blob([text],{type}));a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 $('#save').onclick=()=>download('donghyunbil-experiment.dh',$('#code').value,'text/plain;charset=utf-8');
@@ -133,7 +143,7 @@ $('.file-label').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault
 $('#open').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;if(busy){$('#result').textContent='중단한 뒤 파일을 열 수 있다.';e.target.value='';return;}if(f.size>400000){$('#result').textContent='파일이 너무 크다. 400 KB 이하의 동현랭 코드를 열어라.';return;}const t=await f.text();if(t.length>100000){$('#result').textContent='코드는 100,000자까지다.';return;}$('#code').value=t;codeChanged();$('#result').textContent='코드를 불러왔다. 실행하면 새 실험으로 시작한다.';e.target.value='';};
 $('#csv').onclick=()=>{
   if(!allSeries.length)return;const esc=v=>'"'+String(v??'').replaceAll('"','""')+'"';
-  const meta=[['# model','동현빌 0.33 / 469 people / real 5-minute proximity log repeated over 3 recorded days / stochastic SEIR, hourly samples'],['# data','Kissler et al., BBC Pandemic Haslemere dataset; https://github.com/skissler/haslemere'],['# limitation','Nights and homes are not recorded; three days are repeated; not a forecast for any real place'],['# code',lastSource]],keys=Object.keys(allSeries[0]);
+  const meta=[['# model','동현빌 0.34 / 469 people / real 5-minute proximity log repeated over 3 recorded days / stochastic SEIR, hourly samples'],['# data','Kissler et al., BBC Pandemic Haslemere dataset; https://github.com/skissler/haslemere'],['# limitation','Nights and homes are not recorded; three days are repeated; not a forecast for any real place'],['# code',lastSource]],keys=Object.keys(allSeries[0]);
   download('donghyunbil-observations.csv','\ufeff'+meta.map(r=>r.map(esc).join(',')).join('\n')+'\n'+keys.join(',')+'\n'+allSeries.map(s=>keys.map(k=>esc(s[k])).join(',')).join('\n'),'text/csv;charset=utf-8');
 };
 function setup(c,context,h){
@@ -217,9 +227,8 @@ function drawChart(){
   cc.restore();
   $('#chart-scale').textContent=`Y축 0–${ymax}명 · 자동 범위 · X축 ${span}일 · 한 시간 간격 표본`;
 }
-window.render_game_to_text=()=>JSON.stringify({app:'동현빌',version:'0.33',busy,state:state?{day:state.day,clock:state.clock,night:state.night,counts:state.counts,cum:state.cum,pathogen:state.pathogenName,index:state.index}:null,coordinates:'960×720, x right, y down; sky strip 44px at top; 469 villagers at fixed positions'});
+window.render_game_to_text=()=>JSON.stringify({app:'동현빌',version:'0.34',busy,state:state?{day:state.day,clock:state.clock,night:state.night,counts:state.counts,cum:state.cum,pathogen:state.pathogenName,index:state.index}:null,coordinates:'960×720, x right, y down; sky strip 44px at top; 469 villagers at fixed positions'});
 let ticking=false;function animate(){if(ticking)return;ticking=true;const frame=()=>{draw();if(busy&&!reduced)requestAnimationFrame(frame);else{ticking=false;draw();drawChart();}};requestAnimationFrame(frame);}
 let chartTimer=0;const chartLoop=()=>{if(busy)drawChart();if(busy)chartTimer=setTimeout(chartLoop,500);};
-$('#run').addEventListener('click',()=>{animate();clearTimeout(chartTimer);chartLoop();});$('#slow').addEventListener('click',()=>{animate();clearTimeout(chartTimer);chartLoop();});$('#demo').addEventListener('click',()=>{animate();clearTimeout(chartTimer);chartLoop();});
 new ResizeObserver(()=>{draw();drawChart();}).observe($('.observation'));document.fonts.ready.then(()=>{draw();drawChart();});
 draw();drawChart();init();

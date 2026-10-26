@@ -32,6 +32,14 @@ check('Night has no transmission but timers advance',()=>{const v=new Village(da
 check('Vaccination: all-or-nothing with efficacy, only susceptibles',()=>{const v=new Village(data);v.reset(5);v.setPathogen(1);v.ve=0;assert.strictEqual(v.vaccinateRule(100,1),100);const c=v.counts();assert.strictEqual(c.V,100);assert.strictEqual(c.VI,0);v.ve=100;v.vaccinateRule(50,2);assert.strictEqual(v.counts().VI,50);assert.strictEqual(v.vaccinate(1)+v.vaccinateRule(469,1),469-150);});
 check('Ring rule needs an index case; degree rule picks 330 first',()=>{const v=new Village(data);v.reset(1);v.setPathogen(2);assert.throws(()=>v.vaccinateRule(5,3));v.ve=100;v.vaccinateRule(1,2);assert.strictEqual(v.vaccinated[330],1);v.setIndex(217);assert(v.vaccinateRule(10,3)>0);});
 check('Immune person cannot be the index case',()=>{const v=new Village(data);v.reset(1);v.setPathogen(1);v.ve=100;v.vaccinate(7);assert.throws(()=>v.setIndex(7));});
+check('Susceptibility excludes vaccine immunity, but includes vaccine nonresponders',()=>{
+  const v=new Village(data);v.reset(5);v.setPathogen(1);v.ve=100;v.vaccinateRule(469,1);
+  assert.strictEqual(v.counts().S,0);assert.strictEqual(v.counts().VI,469);assert.strictEqual(v.observe(2),0);
+  v.reset(5);v.setPathogen(1);v.ve=0;v.vaccinateRule(469,1);
+  assert.strictEqual(v.counts().S,469);assert.strictEqual(v.counts().VI,0);assert.strictEqual(v.observe(2),469);
+  const {v:m}=run(1,30,5,x=>{x.ve=80;x.vaccinateRule(200,1);});
+  const c=m.counts();assert.strictEqual(c.S+c.E+c.I+c.R+c.VI,469);
+});
 check('Isolation policies reduce the measles outbreak in order 0 ≥ 1 ≥ 2 (seed 5)',()=>{const r=[0,1,2].map(m=>run(1,60,5,v=>{v.isolationMode=m;}).v.cum);assert(r[0]>=r[1]&&r[1]>=r[2],r.join(','));assert(r[2]<r[0]);});
 check('Observation items are integers in range',()=>{const {v}=run(3,10,2);for(let i=1;i<=10;i++){const x=v.observe(i);assert(Number.isInteger(x)&&x>=0&&x<=469,i);}assert.strictEqual(v.observe(1),10);});
 function exec(code){const {ctx,queue,msgs}=makeContext();ctx.onmessage({data:{type:'init',data}});ctx.onmessage({data:{type:'run',code}});let n=0;while(queue.length){queue.shift()();if(++n>3e6)throw Error('loop');}
