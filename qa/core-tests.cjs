@@ -67,7 +67,7 @@ check('All examples run to completion',()=>{for(const ex of examples){const m=ex
 check('Example outcomes tell the intended stories',()=>{
   const last=id=>exec(examples.find(e=>e.id===id).code);
   const m=last('measles');assert(m.state.cum>400);
-  const c90=last('measles-90').state.cum,c94=last('measles-94').state.cum;assert(c94<c90,'coverage '+c90+' vs '+c94);
+  const c90=last('measles-90').state.cum,c93=last('measles-93').state.cum;assert(c93<c90,'coverage '+c90+' vs '+c93);
   const tgt=exec(examples.find(e=>e.id==='pertussis-targeted').code);assert(tgt.state.cum<150,'targeted pertussis '+tgt.state.cum);
 });
 fs.writeFileSync(path.join(__dirname,'core-results.json'),JSON.stringify({passed:count,at:new Date().toISOString()},null,1)+'\n');
