@@ -9,7 +9,7 @@ const output=(...ns)=>ns.map(n=>'뿡뿡 '+expression(n)+'~뿡뿡뿡~').join('');
 const block=(label,...ns)=>'ㅋㅋ '+label+'\n'+output(...ns);
 /* 이동문을 위해 @이름 표시를 실제 문장 번호의 동현랭 식으로 바꾼다. 문장 번호는 줄이 아니라 `~`로 나눈 조각 순번이다. */
 function asm(parts){
-  const lines=['나는 동현이냐?',''],labels={};let count=2;
+  const lines=['나는 동현이냐?'],labels={};let count=1;
   for(const p of parts){if(typeof p==='object'){labels[p.label]=count+1;continue;}for(const l of p.split('\n')){lines.push(l);count+=l.split('~').length;}}
   lines.push('동현이구나','');
   return lines.map(l=>l.replace(/@(\w+)/g,(_,k)=>{if(!labels[k])throw Error('없는 표시 '+k);return expression(labels[k]);})).join('\n');
