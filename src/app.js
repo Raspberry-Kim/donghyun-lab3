@@ -100,7 +100,9 @@ function receive(m){
   if(m.state)state=m.state;if(m.people)people=m.people;
   if(m.series?.length){series.push(...m.series);}
   if(m.type==='ready'){ready=true;status('마을 준비 완료');}
-  if(m.type==='done'){busy=false;status('실험 완료');const c=state.counts;$('#result').textContent=state.index?`${state.day}일 동안 ${state.pathogenName} 유행을 지켜봤다. 누적 감염 ${state.cum}명(${(state.cum/469*100).toFixed(1)}%), 접종 ${c.V}명, 감수성자 ${c.S}명이 남았다.`:'시간이 흐르지 않았다. 명령 2·3·7로 병원체·첫 환자·기간을 정해 보자.';}
+  if(m.type==='done'&&state.pcv){busy=false;status('실험 완료');const q=state.pcv;if(q.acq&&q.red20!=null)pcvHistory.push([q.red20,q.red21]);if(pcvHistory.length>10)pcvHistory.shift();
+    $('#result').textContent=state.index?`${state.day}일 동안 폐구균 보균을 지켜봤다. 누적 보균 ${state.cum}명(${(state.cum/469*100).toFixed(1)}%), 65세 이상 접종자 ${q.vaccinated}명 가운데 새 보균 ${q.acq}건. 그 보균의 IPD 위험은 PCV20으로 ${q.acq?q.red20.toFixed(1):'–'}%, PCV21로 ${q.acq?q.red21.toFixed(1):'–'}% 줄었다고 셌다(차이 ${q.acq?(q.red21-q.red20).toFixed(1):'–'}%p). 가정값 위의 계산이다. 아래 설명의 한계를 함께 보자.`:'시간이 흐르지 않았다. 명령 3·7로 첫 보균자·기간을 정해 보자.';}
+  else if(m.type==='done'){busy=false;status('실험 완료');const c=state.counts;$('#result').textContent=state.index?`${state.day}일 동안 ${state.pathogenName} 유행을 지켜봤다. 누적 감염 ${state.cum}명(${(state.cum/469*100).toFixed(1)}%), 접종 ${c.V}명, 감수성자 ${c.S}명이 남았다.`:'시간이 흐르지 않았다. 명령 2·3·7로 병원체·첫 환자·기간을 정해 보자.';}
   if(m.type==='halted'){busy=false;status('중단됨');$('#result').textContent='오겡끼데스까. 실험을 멈췄다. 다시 실행하면 처음부터 시작한다.';}
   if(m.type==='error'){busy=false;status('실행 오류','error');$('#result').textContent=(m.line?m.line+'번 문장: ':'')+m.error;}
   if(state&&state.time===0&&lastDay!==0){if(series.length){archive.push(...series.map(x=>({run:runIndex,...x})));}runIndex++;series=[];chartPeak=0;sparks=[];ripples=[];contactTrails=[];}
@@ -112,7 +114,9 @@ function receive(m){
   if(sparks.length>400)sparks.splice(0,sparks.length-400);
   const c=state?.counts||{S:469,E:0,I:0,R:0,V:0,VI:0,Q:0};
   $('#m-s').innerHTML=c.S+' <small>명</small>';$('#m-e').innerHTML=c.E+' <small>명</small>';$('#m-i').innerHTML=c.I+' <small>명</small>';$('#m-r').innerHTML=c.R+' <small>명</small>';
-  $('#m-v').innerHTML=c.V+' <small>명</small>';$('#m-v-note').textContent=c.V?`접종 · 면역 ${c.VI}명`:'접종';$('#m-q').innerHTML=c.Q+' <small>명</small>';
+  if(state?.pcv){$('#m-v').innerHTML=state.pcv.vaccinated+' <small>명</small>';$('#m-v-note').textContent='성인 PCV · 질병 위험만';}
+  else{$('#m-v').innerHTML=c.V+' <small>명</small>';$('#m-v-note').textContent=c.V?`접종 · 면역 ${c.VI}명`:'접종';}
+  drawPcv();$('#m-q').innerHTML=c.Q+' <small>명</small>';
   $('#clock').textContent=(state?`${state.day}일째 ${state.clock}`:'0일째 07:00');$('#clock-note').textContent=state?.index?(state.night?`${DAYNAMES[state.recordDay]}요일 기록 · 밤, 접촉 기록 없음`:`${DAYNAMES[state.recordDay]}요일 기록 위를 지나는 중`):'모의 시간 · 밤은 건너뜀';$('.arena-wrap').classList.toggle('night',!!state?.night);$('#mode').textContent=describe(state);$('#cum-count').textContent='누적 감염 '+(state?.cum||0)+'명';
   $('#step-count').textContent=(m.steps||0).toLocaleString()+'문장';
   if(m.seeds)lastSeeds=m.seeds;
@@ -149,7 +153,7 @@ function prepareScene(d){
 let prevRunCode=null,lastSeeds=[];
 function run(e){const slowRun=e===true;if(!ready||busy)return;dhSlowUI(slowRun);
   if(!ready||busy)return;lastSource=$('#code').value;allSeries=[];archive=[];runIndex=0;series=[];chartPeak=0;sparks=[];ripples=[];contactTrails=[];drawChart();busy=true;$('#welcome').hidden=true;status('실험 중','running');$('#result').textContent=slowRun?'동현랭 명령을 한 줄씩 천천히 실행하고 있다.':'동현랭 명령을 실행하고 있다.';controls();
-  const repeat=lastSource===prevRunCode;prevRunCode=lastSource;
+  const repeat=lastSource===prevRunCode;if(!repeat)pcvHistory=[];prevRunCode=lastSource;
   worker.postMessage({type:'run',code:lastSource,slow:slowRun,repeat});
   animate();clearTimeout(chartTimer);chartLoop();
 }
@@ -213,6 +217,8 @@ function draw(){
     ctx.lineWidth=1.1;ctx.strokeStyle=st===S?p.Sline:st===E?p.Eline:st===I?p.Iline:p.Rline;ctx.stroke();
     ctx.fillStyle='#ffffff';ctx.globalAlpha=st===S?.9:.55;ctx.beginPath();ctx.arc(x-1.6,y-1.8,1.4,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
     if(vac){ctx.strokeStyle=p.V;ctx.lineWidth=imm?1.8:1.2;if(!imm)ctx.setLineDash([2,2.2]);ctx.beginPath();ctx.arc(x,y,7.4,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);}
+    if(code>>7&1){ctx.strokeStyle=p.V;ctx.lineWidth=1.8;ctx.beginPath();ctx.arc(x,y,7.4,0,Math.PI*2);ctx.stroke();}
+    else if(code>>6&1){ctx.strokeStyle=p.ink;ctx.globalAlpha=.55;ctx.lineWidth=1;ctx.beginPath();ctx.arc(x,y,7.4,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=1;}
     if(idx){ctx.fillStyle=p.ink;ctx.font='700 10px "Pretendard"';ctx.textAlign='center';ctx.fillText('첫 환자',x,y-13);ctx.beginPath();ctx.moveTo(x,y-10);ctx.lineTo(x-3,y-13);ctx.lineTo(x+3,y-13);ctx.closePath();ctx.fill();}
   }
   // 전파 불꽃과 물결
@@ -225,6 +231,21 @@ function draw(){
   const keep=[];for(const rp of ripples){const t=(now-rp.at)/700;if(t>=1)continue;keep.push(rp);ctx.strokeStyle=p.spark;ctx.globalAlpha=(1-t)*.8;ctx.lineWidth=2-t;ctx.beginPath();ctx.arc(rp.x,rp.y,6+t*16,0,Math.PI*2);ctx.stroke();}
   ripples=keep;ctx.globalAlpha=1;
   ctx.restore();
+}
+// 예제 16: 같은 사람·같은 보균을 PCV20과 PCV21로 각각 셌을 때 줄어든 IPD 위험. 축은 0~50%로 자르지 않는다.
+let pcvHistory=[];
+function drawPcv(){
+  const el=$('#pcv-panel'),q=state?.pcv;if(!q||!q.vaccinated){el.hidden=true;return;}el.hidden=false;
+  const W2=280,L=46,R=268,x=v=>L+(R-L)*Math.min(v,50)/50,rows=[['PCV20',q.red20,0,'#5f7f9e'],['PCV21',q.red21,1,'#b5652b']];
+  let g=`<rect x="${x(q.rwe.lo)}" y="6" width="${x(q.rwe.hi)-x(q.rwe.lo)}" height="58" fill="#8a9a5b" opacity=".18"/><line x1="${x(q.rwe.est)}" x2="${x(q.rwe.est)}" y1="6" y2="64" stroke="#8a9a5b" stroke-width="1" stroke-dasharray="3 2"/>`;
+  for(const [name,v,k,col] of rows){const y=22+k*26;
+    g+=`<text x="0" y="${y+4}" font-size="11" font-weight="700" fill="currentColor">${name}</text><line x1="${L}" x2="${R}" y1="${y}" y2="${y}" stroke="currentColor" opacity=".18"/>`;
+    for(const h of pcvHistory)g+=`<circle cx="${x(h[k])}" cy="${y}" r="3.6" fill="${col}" opacity=".28"/>`;
+    if(v!=null)g+=`<circle cx="${x(v)}" cy="${y}" r="5.4" fill="${col}" stroke="#fff" stroke-width="1.2"/><text x="${Math.min(x(v),R-14)}" y="${y-8}" font-size="10" text-anchor="middle" fill="${col}" font-weight="700">${v.toFixed(1)}</text>`;}
+  for(const t of [0,10,20,30,40,50])g+=`<text x="${x(t)}" y="78" font-size="9" text-anchor="middle" fill="currentColor" opacity=".6">${t}${t===50?'%':''}</text>`;
+  const diff=q.red20!=null?(q.red21-q.red20).toFixed(1)+'%p':'–';
+  el.innerHTML=`<b>65세 이상 접종자 · 줄어든 IPD 위험</b><svg viewBox="0 0 ${W2} 82" role="img" aria-label="PCV20 ${q.red20?.toFixed(1)??'–'}%, PCV21 ${q.red21?.toFixed(1)??'–'}%">${g}</svg>`+
+    `<small>새 보균 ${q.acq}건 · 차이 ${diff}${pcvHistory.length?` · 흐린 점: 이 코드 ${pcvHistory.length}회`:''}</small><small class="pcv-more">띠: PCV20 실사용 효과 25.6% (95% CI 17.4–33.0) · 혈청형당 효과 ${q.ve.toFixed(1)}% 같게 둔 가정</small>`;
 }
 function niceMax(v){const steps=[10,20,30,50,80,120,160,240,320,400,469];return steps.find(x=>x>=v)||469;}
 function drawChart(){

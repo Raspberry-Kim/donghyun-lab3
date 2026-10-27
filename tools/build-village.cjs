@@ -86,7 +86,9 @@ const pathogens=[
   {id:3,name:'인플루엔자',en:'influenza',R0:1.3,latentDays:1,infectiousDays:5,rho:10,cutoff:50,ve:50,
    note:'계절 인플루엔자 R0 중앙값 1.28 부근. 잠복 약 2일이며 증상 하루 전부터 전염, 5~7일 전염. 접종 효과 40~60% 가운데값.'},
   {id:4,name:'BBC 팬데믹 모의 독감',en:'bbc-pandemic',R0:null,a:1,latentSteps:5,infectiousSteps:859,rho:10,cutoff:20,ve:50,
-   note:'다큐멘터리 설정: a=1, ρ=10 m, 차단 20 m, 감염 25분(5단계) 뒤 전염, 감염 사흘 뒤(원 모의의 572 기록 단계) 회복. R0는 문헌값이 아니라 이 설정의 결과다.'}
+   note:'다큐멘터리 설정: a=1, ρ=10 m, 차단 20 m, 감염 25분(5단계) 뒤 전염, 감염 사흘 뒤(원 모의의 572 기록 단계) 회복. R0는 문헌값이 아니라 이 설정의 결과다.'},
+  {id:5,name:'폐구균 보균',en:'pneumococcal-carriage',R0:2,latentDays:1,infectiousDays:49,rho:10,cutoff:50,ve:0,
+   note:'보균 기간은 성인 종단연구 중앙값 7주(49일). R0 2는 문헌값이 아니라 1년 동안 성인 다수가 한 번쯤 보균하도록 둔 가정값이다(성인 획득률 16.5건/1,000인-주 참고). 보균이 끝나면 이 실행 안에서는 다시 보균하지 않는다. 기본 백신 효과 0%: 성인 PCV는 보균을 막지 않고 명령 13으로 질병 위험만 줄인다고 둔다.'}
 ];
 const Kall=new Map();
 for(const [,a,b,d] of rows){const k=key(a,b);Kall.set(k,(Kall.get(k)||0)+Math.exp(-d/10));}
