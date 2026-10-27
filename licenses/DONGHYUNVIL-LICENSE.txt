@@ -1,4 +1,4 @@
-donghyun-lab3 / Donghyunbil / 동현빌™
+donghyun-lab3 / Donghyunvil / 동현빌™
 
 This distribution has separate terms for application code, the contact
 dataset and fonts. The MIT license below DOES NOT relicense the dataset.

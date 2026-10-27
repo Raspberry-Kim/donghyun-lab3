@@ -156,14 +156,14 @@ function run(e){const slowRun=e===true;if(!ready||busy)return;dhSlowUI(slowRun);
 $('#run').onclick=run;$('#demo').onclick=run;$('#repeat10').onclick=dhRepeatStart;$('#slow').onclick=()=>{if(busy){dhSlowUI(!dhSlowOn);dhRunningNotice();worker.postMessage({type:'speed',slow:dhSlowOn});if(!dhSlowOn)dhMark(0);}else run(true);};$('#halt').onclick=()=>worker?.postMessage({type:'halt'});
 $('#code').onkeydown=e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();run();}if(e.key==='Tab'&&!busy){e.preventDefault();const t=e.target,start=t.selectionStart;t.setRangeText('  ',start,t.selectionEnd,'end');codeChanged();}};
 function download(name,text,type){const a=document.createElement('a'),url=URL.createObjectURL(new Blob([text],{type}));a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
-$('#save').onclick=()=>download('donghyunbil-experiment.dh',$('#code').value,'text/plain;charset=utf-8');
+$('#save').onclick=()=>download('donghyunvil-experiment.dh',$('#code').value,'text/plain;charset=utf-8');
 $('.file-label').tabIndex=0;$('.file-label').setAttribute('role','button');
 $('.file-label').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('#open').click();}};
 $('#open').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;if(busy){$('#result').textContent='중단한 뒤 파일을 열 수 있다.';e.target.value='';return;}if(f.size>400000){$('#result').textContent='파일이 너무 크다. 400 KB 이하의 동현랭 코드를 열어라.';return;}const t=await f.text();if(t.length>100000){$('#result').textContent='코드는 100,000자까지다.';return;}$('#code').value=t;codeChanged();$('#result').textContent='코드를 불러왔다. 실행하면 새 실험으로 시작한다.';e.target.value='';};
 $('#csv').onclick=()=>{
   if(!allSeries.length)return;const esc=v=>'"'+String(v??'').replaceAll('"','""')+'"';
   const meta=[['# model','동현빌 0.38 / 469 people / real 5-minute proximity log repeated over 3 recorded days / stochastic SEIR, hourly samples'],['# data','Kissler et al., BBC Pandemic Haslemere dataset; https://github.com/skissler/haslemere'],['# limitation','Nights and homes are not recorded; three days are repeated; not a forecast for any real place'],['# seed',lastSeeds.join(' ')],['# code',lastSource]],keys=Object.keys(allSeries[0]);
-  download('donghyunbil-observations.csv','\ufeff'+meta.map(r=>r.map(esc).join(',')).join('\n')+'\n'+keys.join(',')+'\n'+allSeries.map(s=>keys.map(k=>esc(s[k])).join(',')).join('\n'),'text/csv;charset=utf-8');
+  download('donghyunvil-observations.csv','\ufeff'+meta.map(r=>r.map(esc).join(',')).join('\n')+'\n'+keys.join(',')+'\n'+allSeries.map(s=>keys.map(k=>esc(s[k])).join(',')).join('\n'),'text/csv;charset=utf-8');
 };
 function setup(c,context,h){
   const w=c.getBoundingClientRect().width;if(w<1)return false;const d=Math.min(devicePixelRatio||1,2);if(c.width!==Math.round(w*d)||c.height!==Math.round(h*d)){c.width=Math.round(w*d);c.height=Math.round(h*d);bg=null;}

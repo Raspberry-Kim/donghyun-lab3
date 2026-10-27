@@ -7,7 +7,7 @@ const licenseNames={
   'NanumGothicCoding-OFL.txt':['license-nanum','Nanum Gothic Coding · SIL Open Font License'],
   'Pretendard-OFL.txt':['license-pretendard','Pretendard · SIL Open Font License'],
   'DONGHYUN-MIT.txt':['license-donghyun','동현랭 실행기 · MIT'],
-  'DONGHYUNBIL-LICENSE.txt':['license-donghyunbil','동현빌 코드·데이터의 이용 조건'],
+  'DONGHYUNVIL-LICENSE.txt':['license-donghyunvil','동현빌 코드·데이터의 이용 조건'],
   'MARKED-MIT.txt':['license-marked','Marked 문서 변환 도구 · MIT 및 원 고지']
 };
 function documentHref(href){

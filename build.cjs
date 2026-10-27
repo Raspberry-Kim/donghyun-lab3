@@ -10,7 +10,7 @@ const app=[src('examples.js'),src('app.js')].join('\n');
 const data=fs.readFileSync(path.join(root,'data/village.json'),'utf8');
 const css=src('style.css')+'\n'+src('brand.css');
 const workerFile=hashed('worker.bundle','js',worker),appFile=hashed('app','js',app),dataFile=hashed('village','json',data),cssFile=hashed('style','css',css);
-fs.copyFileSync(path.join(root,'LICENSE'),path.join(root,'licenses/DONGHYUNBIL-LICENSE.txt'));
+fs.copyFileSync(path.join(root,'LICENSE'),path.join(root,'licenses/DONGHYUNVIL-LICENSE.txt'));
 let html=integrateReferenceDocuments(src('index.html'),root)
   .replace('./style.css','./'+cssFile).replace('./app.js','./'+appFile).replace('./worker.js','./'+workerFile).replace('./village.json','./'+dataFile);
 fs.cpSync(path.join(root,'fonts'),path.join(out,'fonts'),{recursive:true});
