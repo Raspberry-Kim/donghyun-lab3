@@ -1193,7 +1193,7 @@ function drawPcv(){
   for(const t of [0,10,20,30,40,50])g+=`<text x="${x(t)}" y="78" font-size="9" text-anchor="middle" fill="currentColor" opacity=".6">${t}${t===50?'%':''}</text>`;
   const diff=q.red20!=null?(q.red21-q.red20).toFixed(1)+'%p':'–';
   el.innerHTML=`<b>65세 이상 접종자 · 줄어든 IPD 위험</b><svg viewBox="0 0 ${W2} 82" role="img" aria-label="PCV20 ${q.red20?.toFixed(1)??'–'}%, PCV21 ${q.red21?.toFixed(1)??'–'}%">${g}</svg>`+
-    `<small>새 보균 ${q.acq}건 · 차이 ${diff}${pcvHistory.length?` · 흐린 점: 이 코드 ${pcvHistory.length}회`:''}</small><small class="pcv-more">띠: PCV20 실사용 효과 25.6% (95% CI 17.4–33.0) · 혈청형당 효과 ${q.ve.toFixed(1)}% 같게 둔 가정</small>`;
+    `<small>새 보균 ${q.acq}건 · 차이 ${diff}${pcvHistory.length?` · 흐린 점: 이 코드 ${pcvHistory.length}회`:''}</small><small class="pcv-more">띠: 95% 신뢰구간 17.4–33.0% · PCV20이 65세 이상에서 모든 혈청형 IPD를 줄인 실사용 효과(점선 25.6%) · 혈청형당 효과 ${q.ve.toFixed(1)}%는 두 백신 같게 둔 가정</small>`;
 }
 function niceMax(v){const steps=[10,20,30,50,80,120,160,240,320,400,469];return steps.find(x=>x>=v)||469;}
 function drawChart(){
