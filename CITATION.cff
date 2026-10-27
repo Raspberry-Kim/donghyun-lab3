@@ -2,7 +2,7 @@ cff-version: 1.2.0
 message: "If you use this software, please cite it using the metadata below."
 title: "Donghyunbil (동현빌): an educational village-outbreak laboratory on a real contact network, controlled through the esoteric language Donghyun-lang"
 type: software
-version: "0.38.0"
+version: "0.38"
 date-released: "2026-10-27"
 authors:
   - family-names: Kim
@@ -10,16 +10,21 @@ authors:
     orcid: "https://orcid.org/0000-0001-9883-0229"
     affiliation: "Inha University College of Medicine"
 license: MIT
-repository-code: "https://github.com/raspberry-kim/donghyun-lab3"
+repository-code: "https://github.com/Raspberry-Kim/donghyun-lab3"
 url: "https://raspberry-kim.github.io/donghyun-lab3/"
 abstract: >-
-  Donghyunbil is a browser-based, JavaScript educational tool for exploring
-  infectious disease transmission, vaccination and isolation policies. It
-  simulates hypothetical outbreaks (measles, pertussis, influenza) on the
-  publicly released Haslemere contact data (469 participants, 3 days,
-  5-minute resolution), with all interventions specified only through the
-  esoteric programming language Donghyun-lang. It is a teaching model, not a
-  forecasting or policy-decision tool.
+  Donghyunbil is a browser-based, noncommercial educational laboratory for
+  exploring infectious disease transmission, vaccination and isolation
+  policies. It simulates hypothetical outbreaks (measles, pertussis,
+  influenza) on the publicly released Haslemere contact data (469
+  participants, 3 days, 5-minute resolution), with all interventions
+  specified only through the esoteric programming language Donghyun-lang.
+  Contacts are real; outbreaks are hypothetical. It is a teaching model, not a
+  forecasting or policy-decision tool. The MIT license applies only to the
+  original application code, documentation and artwork; no additional license
+  is claimed over the Haslemere dataset, which is included unchanged with
+  attribution to its authors, and the fonts are under the SIL Open Font
+  License. See LICENSE, CREDITS.md and PROVENANCE.md.
 keywords:
   - epidemiology education
   - infectious disease modelling
@@ -29,7 +34,7 @@ keywords:
   - esoteric programming language
   - JavaScript
 references:
-  - type: dataset
+  - type: data
     title: "Haslemere contact dataset (skissler/haslemere)"
     authors:
       - family-names: Kissler
@@ -42,8 +47,7 @@ references:
         given-names: Andrew J. K.
       - family-names: Gog
         given-names: Julia R.
-    year: 2020
-    url: "https://github.com/skissler/haslemere"
+    repository: "https://github.com/skissler/haslemere"
   - type: article
     title: "Sparking \"The BBC Four Pandemic\": Leveraging citizen science and mobile phones to model the spread of disease"
     authors:
@@ -60,3 +64,13 @@ references:
     year: 2018
     journal: bioRxiv
     doi: "10.1101/479154"
+  - type: software
+    title: "Donghyun-lang (동현랭): a Korean esoteric programming language with a browser playground"
+    authors:
+      - family-names: Kim
+        given-names: Dong Hyun
+        orcid: "https://orcid.org/0000-0001-9883-0229"
+        affiliation: "Inha University College of Medicine"
+    version: "1.53"
+    license: MIT
+    repository-code: "https://github.com/Raspberry-Kim/donghyun-lang"
