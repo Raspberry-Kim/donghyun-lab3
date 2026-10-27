@@ -5,6 +5,12 @@
 function random(seed){let x=seed>>>0;return()=>((x=(Math.imul(1664525,x)+1013904223)>>>0)/4294967296);}
 const S=0,E=1,I=2,R=3;
 const DAY=288,ACTIVE=192,NIGHT=96;
+/* 병원체 5(폐구균 보균)의 성인 PCV 결과 층. 보균 획득 1건마다 혈청형 묶음을 하나 뽑고, PCV 접종자이면 그 묶음이 백신에 들어 있을 때
+   그 보균이 침습질환(IPD)이 될 위험을 혈청형당 효과만큼 줄인다고 센다. 보균과 전파에는 영향이 없다(결과만 줄이는 접종).
+   묶음 비율: 질병관리청 「폐렴구균 백신 효과평가」 최종결과보고서(2026) 그림 27(B), 65세 이상 IPD 2023–2025의 PCV20 51.0%·PCV21 57.1%.
+   공통형 44.0%로 나눈 고유형 비율(PCV20만 7.0%, PCV21만 13.1%)은 가정이다. 혈청형당 효과 50.2%는 미국 PCV20 실사용 값
+   (모든 혈청형 IPD 25.6%, Miles 등 Lancet Infect Dis 2026)을 PCV20 포괄률 51.0%로 나눈 보정값이며 두 백신에 같게 준다. */
+const PCV_MODEL={groups:[0.440,0.070,0.131,0.359],in20:[1,1,0,0],in21:[1,0,1,0],ve:0.502,rwe:{est:25.6,lo:17.4,hi:33.0}};
 class Village{
   constructor(data){
     this.D=data;this.N=data.N;this.T=data.T;this.offsets=data.offsets;
@@ -24,6 +30,25 @@ class Village{
     this.time=0;this.day=0;this.pathogen=null;this.index=0;this.started=false;this.ve=null;this.isolationMode=0;
     this.cum=0;this.newToday=0;this.newDays=[];this.hazard=new Float64Array(N+1);this.cands=[];this.series=[];
     this.totalDays=0;
+    this.rng2=random(seed*40503+12345);this.tag=new Uint8Array(N+1);this.pcv=new Uint8Array(N+1);
+    this.pcvStats={tagged:0,vaccinated:0,acqTagged:0,acq:0,c20:0,c21:0};
+  }
+  shuffled(pool){const o=pool.slice();for(let k=o.length-1;k>0;k--){const j=Math.floor(this.rng2()*(k+1));[o[k],o[j]]=[o[j],o[k]];}return o;}
+  tagOlder(n){// 가상 65세 이상 표시. 실제 나이 자료가 아니다. 전파 난수와 따로 쓰는 난수(rng2)로 고른다.
+    const pool=[];for(let i=1;i<=this.N;i++)if(!this.tag[i])pool.push(i);let done=0;
+    for(const i of this.shuffled(pool)){if(done>=n)break;this.tag[i]=1;done++;}this.pcvStats.tagged+=done;return done;
+  }
+  pcvVaccinate(n){// 65세 이상 표시자 가운데 아직 접종하지 않은 감수성자에게 성인 PCV. 보균은 막지 않는다.
+    const pool=[];for(let i=1;i<=this.N;i++)if(this.tag[i]&&!this.pcv[i]&&this.state[i]===S)pool.push(i);let done=0;
+    for(const i of this.shuffled(pool)){if(done>=n)break;this.pcv[i]=1;done++;}this.pcvStats.vaccinated+=done;return done;
+  }
+  pcvAcquire(s){// 보균 획득 1건의 혈청형 묶음을 뽑아 결과 층에 더한다.
+    let u=this.rng2(),g=0;const G=PCV_MODEL.groups;while(g<G.length-1&&u>=G[g]){u-=G[g];g++;}
+    if(!this.tag[s])return;const st=this.pcvStats;st.acqTagged++;
+    if(this.pcv[s]){st.acq++;st.c20+=PCV_MODEL.in20[g];st.c21+=PCV_MODEL.in21[g];}
+  }
+  pcvSummary(){const st=this.pcvStats,ve=PCV_MODEL.ve*100;
+    return {...st,red20:st.acq?ve*st.c20/st.acq:null,red21:st.acq?ve*st.c21/st.acq:null,ve,rwe:PCV_MODEL.rwe};
   }
   setPathogen(id){const p=this.D.pathogens.find(p=>p.id===id);if(!p)throw Error('없는 병원체 번호');this.pathogen=p;}
   effectiveVE(){return this.ve===null?this.pathogen.ve:this.ve;}
@@ -98,6 +123,7 @@ class Village{
           for(let c=0;c<this.cands.length;c+=3)if(this.cands[c]===s){r-=this.cands[c+2];if(r<=0){from=this.cands[c+1];break;}}
           if(!from)for(let c=0;c<this.cands.length;c+=3)if(this.cands[c]===s){from=this.cands[c+1];}
           this.state[s]=E;this.tE[s]=now;this.infector[s]=from;this.secondary[from]++;this.generation[s]=this.generation[from]+1;this.cum++;this.newToday++;
+          if(p.id===5)this.pcvAcquire(s);
           out.events.push({from,to:s});
         }
         hz[s]=0;
@@ -132,4 +158,4 @@ class Village{
     return v[item];
   }
 }
-if(typeof module!=='undefined')module.exports={Village,random,DAY,ACTIVE,NIGHT};
+if(typeof module!=='undefined')module.exports={Village,random,DAY,ACTIVE,NIGHT,PCV_MODEL};

@@ -1,7 +1,7 @@
 let slow=false;
 /* 동현빌의 계산 스레드. 바뀌지 않은 동현랭 실행기가 출력한 정수 묶음만 마을에 전달한다. */
 let D,village,world,vm,running=false,runId=0,steps=0,pending=0,token='',packet=[],queue=[],logs=[],wallStart=0,sentSeries=0,nightHold=0,eventsBuffer=[],lastContacts=[];
-const arity={1:1,2:1,3:1,4:1,5:2,6:1,7:1,8:1,9:1,10:1,11:1};
+const arity={1:1,2:1,3:1,4:1,5:2,6:1,7:1,8:1,9:1,10:1,11:1,12:1,13:1};
 const FRAME_MS=160/3,SPEED_STEPS={1:2,2:8,3:32},NIGHT_HOLD={1:10,2:6,3:1},MAX_DAYS=365;
 const assert=(ok,msg)=>{if(!ok)throw Error(msg);};
 const range=(x,a,b,name)=>assert(Number.isSafeInteger(x)&&x>=a&&x<=b,`${name}: ${a}~${b} 정수여야 한다.`);
@@ -32,11 +32,12 @@ function accept(t){
   if(packet.length===arity[packet[0]]+1){const p=packet;packet=[];command(p[0],p.slice(1));}
 }
 const needPathogen=()=>assert(village.pathogen,'먼저 명령 2로 병원체를 골라라.');
+const needPcv=()=>assert(village.pathogen?.id===5,'명령 12·13은 병원체 5(폐구균 보균)를 고른 뒤에 쓴다.');
 const notStarted=what=>assert(village.time===0,`시간이 흐른 뒤에는 ${what}을 바꿀 수 없다. 명령 1로 초기화하라.`);
 function command(op,a){
   switch(op){
     case 1:{range(a[0],1,2147483647,'시드');const s=runSeed(a[0]);resetWorld(s);seedsUsed.push(s);log('마을 초기화 · 시드 '+s+(seedOffset?` (다시 실행 · 코드의 시드 ${a[0]} 대신)`:''));break;}
-    case 2:{range(a[0],1,4,'병원체 번호');notStarted('병원체');village.setPathogen(a[0]);const p=village.pathogen;world.pathogen=p.id;
+    case 2:{range(a[0],1,5,'병원체 번호');notStarted('병원체');village.setPathogen(a[0]);const p=village.pathogen;world.pathogen=p.id;
       log(`병원체 ${p.id} ${p.name} · 잠복 ${fmtDays(p.latentSteps)} · 전염 ${fmtDays(p.infectiousSteps)} · 기본 백신 효과 ${p.ve}%`);break;}
     case 3:{range(a[0],0,469,'첫 환자 번호');needPathogen();notStarted('첫 환자');const i=village.setIndex(a[0]);world.index=i;log(`첫 환자 ${i}번 (${a[0]===0?'무작위':'지정'}) · 사흘간 4 m 이내 접촉 상대 ${village.degree[i-1]}명`);break;}
     case 4:{range(a[0],1,469,'접종할 사람 번호');needPathogen();const n=village.vaccinate(a[0]);world.vaccinations+=n;log(n?`${a[0]}번 접종 · 효과 ${village.effectiveVE()}%`:`${a[0]}번은 접종 대상이 아니다(이미 접종했거나 감염 상태)`);break;}
@@ -50,6 +51,10 @@ function command(op,a){
       log('격리 정책 '+a[0]+' · '+ISO[a[0]]);break;}
     case 10:world.tags.push({day:village.time/DAY,value:a[0]});log('동현랭 기록: '+a[0]);break;
     case 11:range(a[0],1,3,'재생 속도');world.speed=a[0];log('재생 속도 '+['','느리게','보통','빠르게'][a[0]]);break;
+    case 12:{range(a[0],0,469,'65세 이상 표시 인원');needPcv();notStarted('65세 이상 표시');const n=village.tagOlder(a[0]);
+      log(`가상 65세 이상 표시 ${n}명 (무작위 · 실제 나이가 아니다)`+(n<a[0]?` · 대상 부족으로 ${a[0]-n}명은 표시하지 못함`:''));break;}
+    case 13:{range(a[0],0,469,'성인 PCV 접종 인원');needPcv();notStarted('성인 PCV 접종');assert(village.pcvStats.tagged>0,'먼저 명령 12로 65세 이상 표시를 붙여라.');const n=village.pcvVaccinate(a[0]);
+      log(`65세 이상 표시자 ${n}명 성인 PCV 접종 · 같은 사람을 PCV20과 PCV21로 각각 센다 · 보균은 막지 않는다`+(n<a[0]?` · 대상 부족으로 ${a[0]-n}명은 접종하지 못함`:''));break;}
   }
 }
 const OBS={1:'경과 일수',2:'감수성자',3:'잠복기',4:'전염 중',5:'회복',6:'접종자',7:'누적 감염',8:'격리 중',9:'최근 하루 새 감염',10:'첫 환자의 2차 감염'};
@@ -75,10 +80,10 @@ function afterDay(){
 }
 function snapshot(type='frame',extra={}){
   const N=village.N,people=new Uint8Array(N);
-  for(let i=1;i<=N;i++)people[i-1]=village.state[i]|(village.vaccinated[i]<<2)|(village.immune[i]<<3)|(village.isolated[i]<<4)|((village.index===i)<<5);
+  for(let i=1;i<=N;i++)people[i-1]=village.state[i]|(village.vaccinated[i]<<2)|(village.immune[i]<<3)|(village.isolated[i]<<4)|((village.index===i)<<5)|(village.tag[i]<<6)|(village.pcv[i]<<7);
   const c=village.counts();
   const state={...world,time:village.time,day:village.dayIndex(),clock:village.clock(),night:village.isNight(),recordDay:village.recordDay(),counts:c,cum:village.cum,newToday:village.newToday,
-    pathogenName:village.pathogen?.name||'',index:village.index,secondaryOfIndex:village.index?village.secondary[village.index]:0,pending,running};
+    pathogenName:village.pathogen?.name||'',pcv:village.pcvStats.tagged?village.pcvSummary():null,index:village.index,secondaryOfIndex:village.index?village.secondary[village.index]:0,pending,running};
   const series=village.series.slice(sentSeries);sentSeries=village.series.length;
   postMessage({type,state,people,contacts:lastContacts,events:eventsBuffer,series,logs:logs.slice(-40),steps,line:vm?.currentLine||1,phys:vm&&!vm.done?(vm.stmts?.[vm.pc]?.phys||0):0,slow,seeds:seedsUsed.length?seedsUsed:[world.seed],...extra});
   eventsBuffer=[];
