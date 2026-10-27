@@ -214,3 +214,4 @@ a.series-item:focus-visible{outline:3px solid #a5791c;outline-offset:3px}
 @media(prefers-reduced-motion:reduce){.dh-slow[aria-pressed=true]{animation:none}}
 
 .doi-badge{display:inline-flex;flex:none;border-radius:4px;overflow:hidden;text-decoration:none;white-space:nowrap;font:500 11px/1 var(--mono);letter-spacing:0}.doi-badge b{background:#555;color:#fff;padding:5px 6px;font-weight:500}.doi-badge span{background:#007ec6;color:#fff;padding:5px 7px}.doi-badge:hover{filter:brightness(1.1)}.doi-badge:focus-visible{outline:2px solid var(--ink);outline-offset:2px}.header>.doi-badge{margin:0 auto 0 20px}@media(max-width:780px){.header>.doi-badge{margin-left:10px}.doi-badge span{display:none}}
+.brand-icon{display:inline-block;height:1.3em;width:auto;vertical-align:-.3em;margin-right:.24em}
