@@ -4,6 +4,7 @@ title: "Donghyunbil (동현빌): an educational village-outbreak laboratory on a
 type: software
 version: "0.38"
 date-released: "2026-10-27"
+doi: "10.5281/zenodo.23689490"
 authors:
   - family-names: Kim
     given-names: Dong Hyun
