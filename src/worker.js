@@ -61,7 +61,7 @@ function command(op,a){
   }
 }
 /* 확장 명령 14~28 (예제 17부터). 병원체 6·7과 새 명령에서만 마을의 확장 층(village.ext)을 켠다. */
-const BOX_NAMES={1:'누적 감염·재감염',2:'접종하지 않은 사람의 보균율',3:'혈청형별 보균',4:'기대 IPD',5:'아이·마을 보균율',6:'아기 배정 군',7:'세 제품을 같은 아기에',8:'관찰한 입원 비'};
+const BOX_NAMES={1:'누적 감염·재감염',2:'접종하지 않은 사람의 보균율',3:'혈청형별 보균',4:'기대 IPD',5:'아이·마을 보균율',6:'아기 배정 군',7:'세 제품을 같은 아기에',8:'관찰한 입원 비',9:'점유율 코호트'};
 const PRODUCT_NAMES={0:'보호 없음',1:'아브리스보(산모 접종)',2:'베이포투스(항체주사)',3:'엔플론시아(항체주사)'};
 const needBabyPathogen=()=>assert(village.pathogen&&(village.pathogen.id===6||village.pathogen.id===7),'아기·아이 층은 병원체 6(폐구균 풍토 보균)이나 7(RSV)에서 쓴다.');
 const needRsv=n=>assert(village.pathogen?.id===7,`명령 ${n}은 병원체 7(RSV)을 고른 뒤에 쓴다.`);
@@ -93,7 +93,7 @@ function extCommand(op,a){
     case 27:{assert(a[0]===3||a[0]===7,'함께 돌릴 바이러스: 3 인플루엔자, 7 RSV');range(a[1],1,10,'바이러스 배수');needPn(27);assert(!village.virus,'바이러스는 한 실행에 하나만 함께 돌린다.');
       const i=village.startVirus(a[0],a[1]);label(`${village.virus.p.name} 배수 ${a[1]}`);log(`${village.virus.p.name} 함께 돌림 · 오늘부터 3일마다 1명이 바깥에서 감염되어 들어온다 · 바이러스 전염 중엔 폐구균 획득·전파·IPD 위험 ${a[1]}배 (가정값)`);break;}
     case 28:range(a[0],0,100,'항체의 전파 감소');needRsv(28);village.next.shed=a[0];log(`다음 보호 아기: 보호 기간 안에 감염되면 보호자에게 옮길 위험 ${a[0]}% 감소 (가정값)`);break;
-    case 29:range(a[0],0,8,'결과 상자');boxMode=a[0];log(a[0]?`결과 상자 ${a[0]} · ${BOX_NAMES[a[0]]} · 결과와 무관`:'결과 상자를 내린다');break;
+    case 29:range(a[0],0,9,'결과 상자');boxMode=a[0];log(a[0]?`결과 상자 ${a[0]} · ${BOX_NAMES[a[0]]} · 결과와 무관`:'결과 상자를 내린다');break;
   }
 }
 function runSummary(){

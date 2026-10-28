@@ -275,6 +275,7 @@ function pairSvg(q){
 /* 예제 17~32의 작은 결과 상자(명령 29). 실행 중에도 갱신된다. 흐린 점은 같은 코드의 앞선 실행. */
 let boxHistory=[];
 const RULE_NAME={1:'보호자 무작위',2:'보호자 접촉 많음',4:'보호자 접촉 적음'};
+const SHORT_PROD={1:'아브리스보',2:'베이포투스',3:'엔플론시아'};
 function runTags(runs){
   const parts=runs.map(r=>r.label.split(' · ').filter(p=>p&&!p.startsWith('유입 ')));
   if(runs.length===1)return [parts[0].slice(1).join(' · ')];
@@ -304,6 +305,12 @@ function boxSpec(e){
       rows:two.map(([r,k])=>{const G=r.rsv.groups,a=G.find(g=>g.prod===1),b=G.find(g=>g.prod===2),pa=r.rsv.pair.find(x=>x.k===1),pb=r.rsv.pair.find(x=>x.k===2);
         const obs=a.hospRisk?b.hospRisk/a.hospRisk:null,pr=pa.hosp&&pb.hosp?(1-pb.hosp[0]/100)/(1-pa.hosp[0]/100):null;
         return {label:`${k+1} · 아브리스보 ${RULE_NAME[a.rule[0]].replace('보호자 ','')} · 베이포투스 ${RULE_NAME[b.rule[0]].replace('보호자 ','')}`,live:r.live,vals:[...(obs!=null?[[obs,'c',C[0]]]:[]),...(pr!=null?[[pr,'s',C[1]]]:[])],text:obs==null?'–':obs.toFixed(2)};})};}
+  if(m===9){const sh=rs.filter(([r])=>r.rsv.groups.some(g=>g.prod));if(!sh.length)return null;
+    return {title:'점유율대로 나눠 대어 본 기대값 · 아기 100명당',legend:'베 베이포투스 · 엔 엔플론시아 · 아 아브리스보 (%) · ○ 감염(보호 없음과 같다) · ● MA-LRTI 상당 · □ 입원 상당 · 같은 감염에 점유율 × 시험값',
+      rows:sh.map(([r,k])=>{const q=r.rsv,G=q.groups,n=G.reduce((a,g)=>a+g.n,0)||1,inf=q.infections/n*100,sh=p=>(G.find(g=>g.prod===p)?.n||0)/n,
+        e=end=>q.pair.reduce((a,x)=>a+sh(x.k)*(x[end]?x[end][0]:0),0),ma=inf*(1-e('ma')/100),ho=inf*(1-e('hosp')/100);
+        const mix=[2,3,1,0].map(p=>sh(p)?`${p?SHORT_PROD[p][0]:'없음'}${Math.round(sh(p)*100)}`:null).filter(Boolean).join(' · ');
+        return {label:`${k+1} · ${mix}`,live:r.live,vals:[[inf,'o',C[0]],[ma,'c',C[0]],[ho,'s',C[0]]],text:`${f1(inf)} · ${f1(ma)} · ${f1(ho)}`};})};}
   return null;}
 function boxMax(s){if(s.fixed)return s.fixed;let v=0;for(const r of s.rows)for(const x of r.vals)if(isFinite(x[0]))v=Math.max(v,x[0]);for(const h of boxHistory)for(const x of h)if(isFinite(x))v=Math.max(v,x);
   if(s.one)return Math.max(2,Math.ceil(v*1.1*2)/2);if(s.dec)return Math.max(.02,Math.ceil(v*1.15*50)/50);if(s.pct)return Math.max(5,Math.ceil(v*1.1/5)*5);return niceMax(Math.max(10,v*1.1));}
