@@ -16,10 +16,23 @@ url: "https://raspberry-kim.github.io/donghyun-lab3/"
 abstract: >-
   Donghyunvil is a browser-based, noncommercial educational laboratory for
   exploring infectious disease transmission, vaccination and isolation
-  policies. It simulates hypothetical outbreaks (measles, pertussis,
-  influenza) on the publicly released Haslemere contact data (469
+  policies. It simulates hypothetical outbreaks of measles, pertussis and
+  influenza on the publicly released Haslemere contact data (469
   participants, 3 days, 5-minute resolution), with all interventions
   specified only through the esoteric programming language Donghyun-lang.
+  Pneumococcal examples model endemic carriage (S-C-S) and its rare invasive
+  outcomes, compare serotype coverage of adult PCV20 and PCV21 on the same
+  carriage events, contrast a carriage-reducing (PCV) and an outcome-only
+  (PPSV) mode of action, and show serotype replacement, the return of an
+  excluded serotype (Belgian 19A) and the limits of adding virtual children.
+  RSV examples follow a fixed October-March season and virtual infants
+  attached to real caregivers, covering waning immunity, the first
+  encounter, timing by birth month, caregiver exposure, indirect effects
+  and real-world-evidence pitfalls; published trial estimates for maternal
+  vaccination (Abrysvo), nirsevimab (Beyfortus) and clesrovimab (Enflonsia)
+  are applied to the same simulated infections, with Korean and US add-on
+  antibody rules and product-share scenarios. No head-to-head trial exists
+  and these comparisons are not clinical equivalence or superiority claims.
   Contacts are real; outbreaks are hypothetical. It is a teaching model, not a
   forecasting or policy-decision tool. The MIT license applies only to the
   original application code, documentation and artwork; no additional license
