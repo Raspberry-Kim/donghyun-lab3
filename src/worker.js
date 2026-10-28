@@ -84,7 +84,7 @@ function extCommand(op,a){
     case 22:range(a[0],0,99,'보호자→아기 전파 확률');range(a[1],0,99,'아기→보호자 전파 확률');needBabyPathogen();assert(village.babies.length,'먼저 명령 16으로 아기·아이를 붙여라.');
       village.babyQ.qin=a[0];village.babyQ.qout=a[1];label(`가구 전파 ${a[0]}/${a[1]}%`);log(`가구 전파 · 보호자 한 번의 전염 기간에 아기에게 ${a[0]}%, 아기 한 번의 전염 기간에 보호자에게 ${a[1]}%`);break;
     case 23:range(a[0],0,100,'백신형 비율');range(a[1],0,100-a[0],'X형 비율');needPn(23);village.setMix(a[0],a[1]);log(`혈청형 섞기 · 백신형 ${a[0]}% · X형 ${a[1]}% · 비백신형 ${100-a[0]-a[1]}% (새 획득·유입에 적용)`);break;
-    case 24:{range(a[0],0,469,'접종 인원');range(a[1],0,100,'보균 차단 효과');range(a[2],1,2,'대상');needPn(24);assert(village.mix,'먼저 명령 23으로 혈청형 섞기를 정하라.');
+    case 24:{range(a[0],0,469,'접종 인원');range(a[1],0,100,'PCV 보균 감소 효과');range(a[2],1,2,'대상');needPn(24);assert(village.mix,'먼저 명령 23으로 혈청형 섞기를 정하라.');
       if(a[2]===2)assert(village.babies.length,'먼저 명령 16으로 가상 아이를 붙여라.');const n=village.pnVaccinate(a[0],a[1],1,a[2]);label(`PCV ${a[2]===2?'아이 ':''}${n}명 ${a[1]}%`);
       log(`PCV 접종 ${a[2]===2?'가상 아이':'마을 사람'} ${n}명 · 백신형 보균 획득 위험 ${a[1]}% 감소`);break;}
     case 25:{range(a[0],0,469,'접종 인원');range(a[1],0,100,'IPD 감소 효과');needPn(25);assert(village.mix,'먼저 명령 23으로 혈청형 섞기를 정하라.');const n=village.pnVaccinate(a[0],a[1],2,1);label(`PPSV ${n}명 ${a[1]}%`);
