@@ -21,3 +21,14 @@
 .pcv-panel svg{display:block;width:100%;height:auto;margin:2px 0 0}.pcv-panel>b{font-size:11.5px}
 @media(max-width:780px){.pcv-panel{width:44%;top:10%;right:6px;padding:4px 6px 2px;border-radius:8px}.pcv-panel>b{font-size:9.5px;line-height:1.3;display:block}.pcv-panel small{display:none}}
 #example-note{white-space:pre-line}
+
+/* 예제 17~32: 실행별 결과 패널 */
+.ext-panel{margin:var(--space-4) 0 0;padding:var(--space-3) var(--space-4);background:var(--paper);border:1px solid var(--line);border-radius:6px;font-size:var(--text-xs)}
+.ext-panel .section-title{margin:0 0 var(--space-2)}.ext-panel h2{font-size:var(--text-sm)}
+.ext-scroll{overflow-x:auto;margin:var(--space-2) 0}.ext-panel table{border-collapse:collapse;width:100%;min-width:520px;font-size:11.5px;line-height:1.45}
+.ext-panel th,.ext-panel td{border-bottom:1px solid var(--line);padding:4px 6px;text-align:right;vertical-align:top}.ext-panel th:first-child,.ext-panel td:first-child{text-align:left}
+.ext-panel th{font-weight:700;color:var(--muted)}.ext-panel td small,.ext-panel td i{color:var(--muted);font-size:10.5px;font-style:normal}
+.ext-panel td[rowspan],.ext-panel .l{text-align:left}
+.ext-note{display:block;color:var(--muted);font-size:10.5px;line-height:1.55;margin:2px 0 var(--space-2)}
+.ext-pair{margin:var(--space-3) 0}.ext-pair svg{display:block;width:100%;max-width:520px;height:auto;margin:4px 0;color:var(--ink)}
+.chart-legend #ext-legend{display:contents}.chart-legend #ext-legend:before{display:none}

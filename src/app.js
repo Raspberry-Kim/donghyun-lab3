@@ -1,7 +1,7 @@
 const $=s=>document.querySelector(s),canvas=$('#arena'),ctx=canvas.getContext('2d'),chart=$('#chart'),cc=chart.getContext('2d');
 const W=960,H=720,SKY=60;
 let worker,ready=false,busy=false,state=null,people=null,series=[],allSeries=[],lastSource='',data=null,workerURL='',chartPeak=0,layout=null,paths=[],meadows=[],bg=null,bgKey='';
-let contactTrails=[],sparks=[],ripples=[],lastDay=-1,archive=[],runIndex=0;
+let contactTrails=[],sparks=[],ripples=[],lastDay=-1,archive=[],runIndex=0,extArr={};
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const S=0,E=1,I=2,R=3;
 const palette={
@@ -88,8 +88,9 @@ function renderLog(rows){
 const DAYNAMES=['목','금','토'];
 function describe(s){
   if(!s||!s.pathogenName)return '출발 대기';
-  if(!s.index)return s.pathogenName+' · 첫 환자를 기다리는 중';
+  if(!s.index&&!s.ext)return s.pathogenName+' · 첫 환자를 기다리는 중';
   const c=s.counts;
+  if(!s.index&&s.time===0)return s.pathogenName+' · 바깥 유입을 기다리는 중';
   if(s.time===0)return `${s.pathogenName} · 첫 환자 ${s.index}번이 마을에 들어왔다`;
   if(c.E+c.I===0)return `${s.pathogenName} · 유행이 끝났다 · 누적 ${s.cum}명`;
   if(s.night)return `${s.pathogenName} · 밤, 기록이 없는 시간이 흐른다`;
@@ -98,10 +99,12 @@ function describe(s){
 function receive(m){
   const now=performance.now();
   if(m.state)state=m.state;if(m.people)people=m.people;
+  extArr={strains:m.strains||null,babies:m.babies||null,virus:m.virus||null,pnVac:m.pnVac||null};
   if(m.series?.length){series.push(...m.series);}
   if(m.type==='ready'){ready=true;status('마을 준비 완료');}
   if(m.type==='done'&&state.pcv){busy=false;status('실험 완료');const q=state.pcv;if(q.acq&&q.red20!=null)pcvHistory.push([q.red20,q.red21]);if(pcvHistory.length>10)pcvHistory.shift();
     $('#result').textContent=state.index?`${state.day}일 동안 폐구균 보균을 지켜봤다. 누적 보균 ${state.cum}명(${(state.cum/469*100).toFixed(1)}%), 65세 이상 접종자 ${q.vaccinated}명 가운데 새 보균 ${q.acq}건. 그 보균의 IPD 위험은 PCV20으로 ${q.acq?q.red20.toFixed(1):'–'}%, PCV21로 ${q.acq?q.red21.toFixed(1):'–'}% 줄었다고 셌다(차이 ${q.acq?(q.red21-q.red20).toFixed(1):'–'}%p). 가정값 위의 계산이다. 아래 설명의 한계를 함께 보자.`:'시간이 흐르지 않았다. 명령 3·7로 첫 보균자·기간을 정해 보자.';}
+  else if(m.type==='done'&&state.ext){busy=false;status('실험 완료');$('#result').textContent=extResult(state);}
   else if(m.type==='done'){busy=false;status('실험 완료');const c=state.counts;$('#result').textContent=state.index?`${state.day}일 동안 ${state.pathogenName} 유행을 지켜봤다. 누적 감염 ${state.cum}명(${(state.cum/469*100).toFixed(1)}%), 접종 ${c.V}명, 감수성자 ${c.S}명이 남았다.`:'시간이 흐르지 않았다. 명령 2·3·7로 병원체·첫 환자·기간을 정해 보자.';}
   if(m.type==='halted'){busy=false;status('중단됨');$('#result').textContent='오겡끼데스까. 실험을 멈췄다. 다시 실행하면 처음부터 시작한다.';}
   if(m.type==='error'){busy=false;status('실행 오류','error');$('#result').textContent=(m.line?m.line+'번 문장: ':'')+m.error;}
@@ -116,7 +119,7 @@ function receive(m){
   $('#m-s').innerHTML=c.S+' <small>명</small>';$('#m-e').innerHTML=c.E+' <small>명</small>';$('#m-i').innerHTML=c.I+' <small>명</small>';$('#m-r').innerHTML=c.R+' <small>명</small>';
   if(state?.pcv){$('#m-v').innerHTML=state.pcv.vaccinated+' <small>명</small>';$('#m-v-note').textContent='성인 PCV · 질병 위험만';}
   else{$('#m-v').innerHTML=c.V+' <small>명</small>';$('#m-v-note').textContent=c.V?`접종 · 면역 ${c.VI}명`:'접종';}
-  drawPcv();$('#m-q').innerHTML=c.Q+' <small>명</small>';
+  drawPcv();drawExt();$('#m-q').innerHTML=c.Q+' <small>명</small>';
   $('#clock').textContent=(state?`${state.day}일째 ${state.clock}`:'0일째 07:00');$('#clock-note').textContent=state?.index?(state.night?`${DAYNAMES[state.recordDay]}요일 기록 · 밤, 접촉 기록 없음`:`${DAYNAMES[state.recordDay]}요일 기록 위를 지나는 중`):'모의 시간 · 밤은 건너뜀';$('.arena-wrap').classList.toggle('night',!!state?.night);$('#mode').textContent=describe(state);$('#cum-count').textContent='누적 감염 '+(state?.cum||0)+'명';
   $('#step-count').textContent=(m.steps||0).toLocaleString()+'문장';
   if(m.seeds)lastSeeds=m.seeds;
@@ -221,6 +224,13 @@ function draw(){
     else if(code>>6&1){ctx.strokeStyle=p.ink;ctx.globalAlpha=.55;ctx.lineWidth=1;ctx.beginPath();ctx.arc(x,y,7.4,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=1;}
     if(idx){ctx.fillStyle=p.ink;ctx.font='700 10px "Pretendard"';ctx.textAlign='center';ctx.fillText('첫 환자',x,y-13);ctx.beginPath();ctx.moveTo(x,y-10);ctx.lineTo(x-3,y-13);ctx.lineTo(x+3,y-13);ctx.closePath();ctx.fill();}
   }
+  // 확장 표시: 폐구균 혈청형 묶음·함께 도는 바이러스·폐구균 접종 고리·가상 아기
+  if(extArr.strains||extArr.virus||extArr.pnVac){for(let i=1;i<=469;i++){const st=people?people[i-1]&3:0,[x,y]=px(i);
+    if(extArr.pnVac&&extArr.pnVac[i-1]){ctx.strokeStyle=p.V;ctx.lineWidth=1.6;if(extArr.pnVac[i-1]===2)ctx.setLineDash([2,2.2]);ctx.beginPath();ctx.arc(x,y,7.4,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);}
+    if(extArr.strains&&(st===E||st===I)){const t=extArr.strains[i-1];if(t){ctx.fillStyle=STRAIN_COL[t];ctx.beginPath();ctx.arc(x,y,2.4,0,Math.PI*2);ctx.fill();}}
+    if(extArr.virus&&extArr.virus[i-1]===2){ctx.strokeStyle=VIRUS_COL;ctx.lineWidth=1.4;ctx.beginPath();ctx.arc(x,y,9.6,0,Math.PI*2);ctx.stroke();}}}
+  if(extArr.babies){const B=extArr.babies;for(let k=0;k<B.length;k+=3){const st=B[k+1];if(st<0)continue;const [x0,y0]=px(B[k]),x=x0+7,y=y0+7;
+    ctx.beginPath();ctx.arc(x,y,2.8,0,Math.PI*2);ctx.fillStyle=st===S?p.S:st===E?p.E:st===I?p.I:p.R;ctx.fill();ctx.lineWidth=.9;ctx.strokeStyle=B[k+2]?p.V:p.ink;ctx.globalAlpha=B[k+2]?1:.45;ctx.stroke();ctx.globalAlpha=1;}}
   // 전파 불꽃과 물결
   const remain=[];
   for(const sp of sparks){const t=(now-sp.at)/(reduced?1:700);if(t>=1){ripples.push({x:px(sp.to)[0],y:px(sp.to)[1],at:now});continue;}remain.push(sp);
@@ -247,10 +257,41 @@ function drawPcv(){
   el.innerHTML=`<b>65세 이상 접종자 · 줄어든 IPD 위험</b><svg viewBox="0 0 ${W2} 82" role="img" aria-label="PCV20 ${q.red20?.toFixed(1)??'–'}%, PCV21 ${q.red21?.toFixed(1)??'–'}%">${g}</svg>`+
     `<small>새 보균 ${q.acq}건 · 차이 ${diff}${pcvHistory.length?` · 흐린 점: 이 코드 ${pcvHistory.length}회`:''}</small><small class="pcv-more">95% 신뢰구간(17.4–33.0%): PCV20이 65세 이상에서 모든 혈청형 IPD를 줄인 실사용 효과 · 혈청형당 효과 ${q.ve.toFixed(1)}%는 두 백신 같게 둔 가정</small>`;
 }
+/* 예제 17~32: 실행별 결과·RSV 세 제품의 쌍 비교·출생 묶음·배정 군 비교. 막대를 쌓지 않는다. */
+const STRAIN_COL=[null,'#5f7f9e','#b5652b','#8a4f9e'],VIRUS_COL='#2f8f83',PROD_COL=[null,'#9b5d8f','#5f7f9e','#b5652b'];
+const f1=v=>v==null||!isFinite(v)?'–':(+v).toFixed(1),esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const C3_REF=[['Jabagi 등, JAMA 2026 (미국)','입원 aHR 0.74 (0.61–0.88)'],['Valtuille 등, Lancet Child Adolesc Health 2026 (프랑스)','입원 OR 0.78 (0.70–0.86)']];
+function extResult(s){const e=s.ext,r=e.runs[e.runs.length-1];if(!r)return '시간이 흐르지 않았다.';
+  if(r.pn){const q=r.pn;return `${r.days}일 동안 ${s.pathogenName}을 지켜봤다. 평균 보균율 ${f1(q.prev)}%(최근 30일 ${f1(q.last30.all)}%), 새 보균 ${q.acq}건, 그 보균에서 기대되는 IPD ${q.ipd.toFixed(3)}건이다. IPD는 세지 않고 위험을 더한 값이다.`;}
+  if(r.rsv){const q=r.rsv;return `${r.days}일 동안 RSV를 지켜봤다. 마을 누적 감염 ${r.cum}건(재감염 ${r.reinf}건), 가상 아기 ${q.babies}명 가운데 ${q.infections}건 감염. 아래 표는 같은 감염 아기에게 세 제품을 각각 대어 본 값과, 실제로 배정한 군끼리 비교한 값이다.`;}
+  return `${r.days}일 동안 ${s.pathogenName}을 지켜봤다. 누적 감염 ${r.cum}건, 그 가운데 재감염 ${r.reinf}건, 바깥 유입 ${r.imports}명.`;}
+function pairSvg(q){
+  const L=92,R=300,x=v=>L+(R-L)*(Math.max(-20,Math.min(100,v))+20)/120;let g='';
+  for(const t of [-20,0,20,40,60,80,100])g+=`<line x1="${x(t)}" x2="${x(t)}" y1="4" y2="${8+q.pair.length*30}" stroke="currentColor" opacity="${t===0?.4:.1}"/><text x="${x(t)}" y="${20+q.pair.length*30}" font-size="9" text-anchor="middle" fill="currentColor" opacity=".6">${t}${t===100?'%':''}</text>`;
+  q.pair.forEach((r,k)=>{const y=18+k*30,col=PROD_COL[r.k];g+=`<text x="0" y="${y+4}" font-size="11" font-weight="700" fill="${col}">${esc(r.name)}</text>`;
+    [['ma',-5,'c'],['hosp',5,'s']].forEach(([key,dy,sh])=>{const v=r[key];if(!v)return;const yy=y+dy;g+=`<line x1="${x(v[1])}" x2="${x(v[2])}" y1="${yy}" y2="${yy}" stroke="${col}" stroke-width="1.4" opacity=".7"/>`;
+      g+=sh==='c'?`<circle cx="${x(v[0])}" cy="${yy}" r="4" fill="${col}"/>`:`<rect x="${x(v[0])-3.6}" y="${yy-3.6}" width="7.2" height="7.2" fill="#fff" stroke="${col}" stroke-width="1.6"/>`;});});
+  return `<svg viewBox="0 0 304 ${26+q.pair.length*30}" role="img" aria-label="세 제품을 같은 감염 아기에게 각각 적용한 평균 효과와 시험 신뢰구간">${g}</svg>`;}
+function drawExt(){
+  const el=$('#ext-panel'),e=state?.ext;if(!e||!e.runs.length){el.hidden=true;return;}el.hidden=false;
+  const runs=e.runs;let h='<div class="section-title"><h2>실행별 결과</h2><span>예제 17~32 · 계산값 · 진료·정책 결정 도구가 아니다</span></div>';
+  const pnRuns=runs.filter(r=>r.pn),plain=runs.filter(r=>!r.pn&&!r.rsv),rsvRuns=runs.filter(r=>r.rsv);
+  if(plain.length)h+=`<div class="ext-scroll"><table><thead><tr><th>실행</th><th>일</th><th>누적 감염</th><th>재감염</th><th>바깥 유입</th></tr></thead><tbody>${plain.map(r=>`<tr><td>${esc(r.label)}${r.live?' <i>진행 중</i>':''}</td><td>${r.days}</td><td>${r.cum}</td><td>${r.reinf}</td><td>${r.imports}</td></tr>`).join('')}</tbody></table></div>`;
+  if(pnRuns.length)h+=`<div class="ext-scroll"><table><thead><tr><th>실행</th><th>일</th><th>평균 보균</th><th>비접종자 보균</th><th>최근 30일 백신형·비백신형·X형</th><th>아이 보균</th><th>새 보균</th><th>기대 IPD (접종자·비접종자)</th></tr></thead><tbody>${pnRuns.map(r=>{const q=r.pn,m=q.mix;return `<tr><td>${esc(r.label)}${r.live?' <i>진행 중</i>':''}${q.virus?`<br><small>${esc(q.virus.name)} 누적 ${q.virus.cum}명</small>`:''}</td><td>${r.days}</td><td>${f1(q.prev)}%</td><td>${f1(q.prevUnvac)}%</td><td>${m?`${f1(q.last30.VT)} · ${f1(q.last30.NVT)} · ${m[1]?f1(q.last30.X):'–'}%`:'–'}</td><td>${q.children?f1(q.prevChild)+'%':'–'}</td><td>${q.acq}</td><td>${q.ipd.toFixed(3)} (${q.ipdVac.toFixed(3)} · ${q.ipdUnvac.toFixed(3)})</td></tr>`;}).join('')}</tbody></table></div><small class="ext-note">보균율은 마을 469명 가운데 보균 중인 사람의 하루 평균 비율이다. 기대 IPD는 새 보균마다 침습도(가정값)를 곱해 더한 위험이고, 실제로 생긴 환자 수가 아니다.</small>`;
+  if(rsvRuns.length){
+    h+=`<div class="ext-scroll"><table><thead><tr><th>실행</th><th class="l">배정 군</th><th>아기</th><th>감염 위험</th><th>MA-LRTI 상당</th><th>입원 상당</th></tr></thead><tbody>${rsvRuns.map(r=>r.rsv.groups.map((g,k)=>`<tr>${k?'':`<td rowspan="${r.rsv.groups.length}">${esc(r.label)}${r.live?' <i>진행 중</i>':''}<br><small>마을 누적 ${r.cum} · 아기 감염 ${r.rsv.infections} · 아기→보호자 ${r.rsv.fromBaby}</small></td>`}<td class="l">${esc(g.name)}${g.short?` <small>(14일 미만 ${g.short})</small>`:''}<br><small>보호자 ${g.rule.map(x=>({1:'무작위',2:'접촉 많음',4:'접촉 적음'})[x]).join('·')}</small></td><td>${g.n}</td><td>${f1(g.risk*100)}</td><td>${f1(g.maRisk*100)}</td><td>${f1(g.hospRisk*100)}</td></tr>`).join('')).join('')}</tbody></table></div><small class="ext-note">아기 100명당 값이다. ‘상당’은 보호받지 않은 감염 1건을 1로 센 상대 단위이며, 실제 MA-LRTI·입원 발생률이 아니다.</small>`;
+    const last=rsvRuns[rsvRuns.length-1],q=last.rsv;
+    if(q.infections){h+=`<div class="ext-pair"><b>같은 감염 아기 ${q.infections}건에 세 제품을 각각 대어 본 평균 효과</b> <small>(${esc(last.label)})</small>${pairSvg(q)}<small class="ext-note">● MA-LRTI · □ 입원 · 가로선은 각 시험이 보고한 신뢰구간(수준이 서로 다르다: 아브리스보 99.5%·97.58%·99.17%, 베이포투스·엔플론시아 95%). 시험값을 각 아기의 날짜에 대어 평균한 것이고, 세 제품을 직접 비교한 시험은 없다. 근거 창 밖 감염: ${q.pair.map(r=>`${esc(r.name)} ${r.out}건`).join(' · ')}.</small></div>`;
+      if(q.cohorts.length>1)h+=`<div class="ext-scroll"><table><thead><tr><th>출생 묶음</th><th>아기</th><th>감염</th>${q.pair.map(r=>`<th style="color:${PROD_COL[r.k]}">${esc(r.name)} MA-LRTI</th>`).join('')}</tr></thead><tbody>${q.cohorts.map(c=>`<tr><td>${c.birth===0?'계절 시작일':c.birth<0?`계절 ${-c.birth}일 전`:`계절 ${c.birth}일 뒤`}${c.interval!==35?` · 산모 접종→분만 ${c.interval}일`:''}</td><td>${c.n}</td><td>${c.inf}</td>${(c.ma||[null,null,null]).map(v=>`<td>${f1(v)}%</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;}
+    const two=rsvRuns.filter(r=>r.rsv.groups.some(g=>g.prod===1)&&r.rsv.groups.some(g=>g.prod===2));
+    if(two.length){h+=`<div class="ext-scroll"><table><thead><tr><th>실행</th><th>관찰한 입원 비 (베이포투스 군 ÷ 아브리스보 군)</th><th>같은 아기에 둘 다 대어 본 비</th></tr></thead><tbody>${two.map(r=>{const G=r.rsv.groups,a=G.find(g=>g.prod===1),b=G.find(g=>g.prod===2),pa=r.rsv.pair.find(x=>x.k===1),pb=r.rsv.pair.find(x=>x.k===2);
+      const obs=a.hospRisk?b.hospRisk/a.hospRisk:null,paired=pa.hosp&&pb.hosp?(1-pb.hosp[0]/100)/(1-pa.hosp[0]/100):null;return `<tr><td>${esc(r.label)}</td><td>${obs==null?'–':obs.toFixed(2)}</td><td>${paired==null?'–':paired.toFixed(2)}</td></tr>`;}).join('')}</tbody></table></div><small class="ext-note">실제 연구의 값: ${C3_REF.map(([a,b])=>`${a} ${b}`).join(' · ')}. 이 마을의 비는 보호자 배정에 따라 흔들린다. 실제 연구의 숫자를 재현하려는 계산이 아니다.</small>`;}
+  }
+  el.innerHTML=h;}
 function niceMax(v){const steps=[10,20,30,50,80,120,160,240,320,400,469];return steps.find(x=>x>=v)||469;}
 function drawChart(){
   const src=allSeries.length?allSeries:series;
-  for(const s of src)chartPeak=Math.max(chartPeak,s.E+s.I,s.R,s.VI);
+  for(const s of src)chartPeak=Math.max(chartPeak,s.E+s.I,s.R,s.VI,s.virus||0);
   const ymax=niceMax(Math.max(10,chartPeak*1.1));chart.dataset.yMax=String(ymax);
   const w=chart.getBoundingClientRect().width;if(w<1)return;const h=w<500?300:360,d=Math.min(devicePixelRatio||1,2);chart.width=Math.round(w*d);chart.height=Math.round(h*d);chart.style.height=h+'px';cc.setTransform(d,0,0,d,0,0);
   const p=theme(),dark=document.documentElement.dataset.theme==='dark',left=46,right=w-16,top=20,bottom=h-34;cc.clearRect(0,0,w,h);cc.fillStyle=dark?'#201d18':'#fbf7ef';cc.fillRect(0,0,w,h);cc.font='11px "Nanum Gothic Coding"';cc.textAlign='right';
@@ -264,6 +305,11 @@ function drawChart(){
   area('I',()=>0,p.I);area('E',s=>s.I,p.E);
   const line=(key,color,dash)=>{if(!src.length)return;cc.strokeStyle=color;cc.lineWidth=2;cc.setLineDash(dash||[]);cc.beginPath();src.forEach((s,i)=>{const x=xs(s.t),y=ys(s[key]);if(i)cc.lineTo(x,y);else cc.moveTo(x,y);});cc.stroke();cc.setLineDash([]);};
   line('R',p.Rline);line('VI',p.V,[5,4]);
+  const ext=[];if(src.some(r=>r.VT!=null)){ext.push(['VT',STRAIN_COL[1],[],'백신형 보균'],['NVT',STRAIN_COL[2],[],'비백신형 보균']);if(src.some(r=>r.X))ext.push(['X',STRAIN_COL[3],[],'X형 보균']);}
+  if(src.some(r=>r.virus!=null))ext.push(['virus',VIRUS_COL,[2,3],'함께 도는 바이러스 전염 중']);
+  if(src.some(r=>r.baby!=null))ext.push(['baby',p.ink,[1,3],'감염·보균 중인 아기·아이']);
+  for(const [k,col,dash] of ext)line(k,col,dash);
+  $('#ext-legend').innerHTML=ext.map(([k,col,dash,name])=>`<span style="--series:${col}" class="k-ext">${name} (선)</span>`).join('');
   cc.restore();
   $('#chart-scale').textContent=`Y축 0–${ymax}명 · 자동 범위 · X축 ${span}일 · 한 시간 간격 표본`;
 }
