@@ -191,7 +191,7 @@ const PN_INVASIVE=[10,20,5,40];
 const BABY_DEFAULT={7:{qin:26.8,qout:23.8,latentDays:4,infDays:18,sis:false,ext:0},6:{qin:30,qout:30,latentDays:1,infDays:51,sis:true,ext:0.00825}};
 Object.assign(Village.prototype,{
   resetExt(seed){
-    const N=this.N;this.ext=false;this.rng3=random(seed*69069+20261028);this.rng4=random(seed*22695477+1);
+    const N=this.N;this.ext=false;this.rng3=random(seed*69069+20261028);this.rng4=random(seed*22695477+1);this.rng5=random(seed*1103515245+4242);
     this.wane=0;this.everInf=new Uint8Array(N+1);this.reinf=0;this.imp={every:0,n:0,start:-1,last:-1,count:0};
     this.strain=new Uint8Array(N+1);this.mix=null;this.pnVac=new Uint8Array(N+1);this.leakyEff=0;this.outEff=0;this.coverX=1;
     this.pn={acq:[0,0,0,0],acqVac:0,acqUnvac:0,ipd:0,ipdVac:0,ipdUnvac:0,samples:0,prev:0,prevUnvac:0,prevType:[0,0,0,0],prevChild:0,leaky:0,out:0,childLeaky:0};
@@ -312,13 +312,13 @@ Object.assign(Village.prototype,{
   virusResolve(){const v=this.virus;for(const s of v.touched){if(this.rng4()<1-Math.exp(-v.hz[s])){v.state[s]=1;v.tE[s]=this.time;v.cum++;}v.hz[s]=0;}v.touched.length=0;},
   virusTransitions(){const v=this.virus;for(let i=1;i<=this.N;i++){const s=v.state[i];
     if(s===1&&this.time-v.tE[i]>=v.p.latentSteps){v.state[i]=2;v.tI[i]=this.time;}else if(s===2&&this.time-v.tI[i]>=v.p.infectiousSteps)v.state[i]=3;}},
-  /* 폐구균 접종: 1 PCV(누수형 · 백신형 획득 위험을 효과만큼 줄임), 2 PPSV(보균은 그대로, 백신형 보균의 IPD 위험만 줄임) */
+  /* 폐구균 접종: 1 PCV(누수형 · 백신형 획득 위험을 효과만큼 줄임), 2 PPSV(보균은 그대로, 백신형 보균의 IPD 위험만 줄임). 접종자 고르기는 따로 쓰는 난수(rng5)라 유입·혈청형의 우연을 바꾸지 않는다. */
   pnVaccinate(n,eff,kind,target){
     this.enableExt();if(kind===1)this.leakyEff=eff;else this.outEff=eff;let done=0;
-    if(target===2){const pool=this.babies.filter(b=>!b.leaky);for(let k=pool.length-1;k>0;k--){const j=Math.floor(this.rng3()*(k+1));[pool[k],pool[j]]=[pool[j],pool[k]];}
+    if(target===2){const pool=this.babies.filter(b=>!b.leaky);for(let k=pool.length-1;k>0;k--){const j=Math.floor(this.rng5()*(k+1));[pool[k],pool[j]]=[pool[j],pool[k]];}
       for(const b of pool){if(done>=n)break;b.leaky=eff;done++;}this.pn.childLeaky+=done;return done;}
     const pool=[];for(let i=1;i<=this.N;i++)if(!this.pnVac[i])pool.push(i);
-    for(let k=pool.length-1;k>0;k--){const j=Math.floor(this.rng3()*(k+1));[pool[k],pool[j]]=[pool[j],pool[k]];}
+    for(let k=pool.length-1;k>0;k--){const j=Math.floor(this.rng5()*(k+1));[pool[k],pool[j]]=[pool[j],pool[k]];}
     for(const i of pool){if(done>=n)break;this.pnVac[i]=kind;done++;}
     if(kind===1)this.pn.leaky+=done;else this.pn.out+=done;return done;
   },

@@ -74,7 +74,7 @@ function extCommand(op,a){
     case 15:{range(a[0],0,365,'유입 간격');range(a[1],0,469,'유입 인원');needPathogen();village.setImport(a[0],a[1]);if(a[0])label(`유입 ${a[0]}일마다 ${a[1]}명`);
       log(a[0]?`마을 밖 유입 · ${a[0]}일마다 ${a[1]}명이 바깥에서 감염되어 들어온다 (계절 시작 ${village.imp.start}일)`:'마을 밖 유입 멈춤');break;}
     case 16:{range(a[0],0,469,'아기 인원');assert([1,2,4].includes(a[1]),'보호자 규칙: 1 무작위, 2 접촉이 많은 사람부터, 4 접촉이 적은 사람부터');needBabyPathogen();
-      const n=village.addBabies(a[0],a[1]),nx=village.next,rsv=village.pathogen.id===7;
+      const n=village.addBabies(a[0],a[1]),nx=village.next,rsv=village.pathogen.id===7;if(village.pathogen.id===6)label(`보호자 ${a[1]===1?'무작위':a[1]===2?'접촉 많음':'접촉 적음'}`);
       log(`가상 ${rsv?'아기':'아이'} ${n}명을 보호자(${RULES[a[1]]})에게 붙임 · 출생 ${nx.birth}일`+(rsv?` · ${PRODUCT_NAMES[nx.prod]}`+(nx.prod===1?` · 산모 접종→분만 ${nx.interval}일`:''):'')+(n<a[0]?` · 보호자 부족으로 ${a[0]-n}명은 붙이지 못함`:''));break;}
     case 17:range(a[0],-365,365,'출생일');needRsv(17);village.next.birth=a[0];log(`다음 아기의 출생일 ${a[0]}일`+(a[0]<0?' (시작 전에 태어나 이미 '+(-a[0])+'일 된 아기)':''));break;
     case 18:range(a[0],0,3,'보호 전략');needRsv(18);village.next.prod=a[0];log('다음 아기의 보호 전략: '+PRODUCT_NAMES[a[0]]);break;
@@ -89,7 +89,7 @@ function extCommand(op,a){
       log(`PCV 접종 ${a[2]===2?'가상 아이':'마을 사람'} ${n}명 · 백신형 보균 획득 위험 ${a[1]}% 감소`);break;}
     case 25:{range(a[0],0,469,'접종 인원');range(a[1],0,100,'IPD 감소 효과');needPn(25);assert(village.mix,'먼저 명령 23으로 혈청형 섞기를 정하라.');const n=village.pnVaccinate(a[0],a[1],2,1);label(`PPSV ${n}명 ${a[1]}%`);
       log(`PPSV 접종 ${n}명 · 보균은 그대로, 백신형 보균의 IPD 위험 ${a[1]}% 감소`);break;}
-    case 26:range(a[0],0,1,'X형 포함');needPn(26);assert(village.mix,'먼저 명령 23으로 혈청형 섞기를 정하라.');village.coverX=a[0];village.enableExt();log(a[0]?'백신에 X형 포함':'백신에서 X형을 뺌 · 이제 X형 획득은 막지 못한다');break;
+    case 26:range(a[0],0,1,'X형 포함');needPn(26);assert(village.mix,'먼저 명령 23으로 혈청형 섞기를 정하라.');village.coverX=a[0];village.enableExt();if(!a[0]&&village.time>0)label(`X형 뺌(${Math.round(village.time/DAY)}일째)`);log(a[0]?'백신에 X형 포함':'백신에서 X형을 뺌 · 이제 X형 획득은 막지 못한다');break;
     case 27:{assert(a[0]===3||a[0]===7,'함께 돌릴 바이러스: 3 인플루엔자, 7 RSV');range(a[1],1,10,'바이러스 배수');needPn(27);assert(!village.virus,'바이러스는 한 실행에 하나만 함께 돌린다.');
       const i=village.startVirus(a[0],a[1]);label(`${village.virus.p.name} 배수 ${a[1]}`);log(`${village.virus.p.name} 함께 돌림 · 오늘부터 3일마다 1명이 바깥에서 감염되어 들어온다 · 바이러스 전염 중엔 폐구균 획득·전파·IPD 위험 ${a[1]}배 (가정값)`);break;}
     case 28:range(a[0],0,100,'항체의 전파 감소');needRsv(28);village.next.shed=a[0];log(`다음 보호 아기: 보호 기간 안에 감염되면 보호자에게 옮길 위험 ${a[0]}% 감소 (가정값)`);break;
