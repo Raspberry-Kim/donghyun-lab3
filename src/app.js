@@ -169,7 +169,7 @@ $('.file-label').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault
 $('#open').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;if(busy){$('#result').textContent='중단한 뒤 파일을 열 수 있다.';e.target.value='';return;}if(f.size>400000){$('#result').textContent='파일이 너무 크다. 400 KB 이하의 동현랭 코드를 열어라.';return;}const t=await f.text();if(t.length>100000){$('#result').textContent='코드는 100,000자까지다.';return;}$('#code').value=t;codeChanged();$('#result').textContent='코드를 불러왔다. 실행하면 새 실험으로 시작한다.';e.target.value='';};
 $('#csv').onclick=()=>{
   if(!allSeries.length)return;const esc=v=>'"'+String(v??'').replaceAll('"','""')+'"';
-  const meta=[['# model','동현빌 0.38 / 469 people / real 5-minute proximity log repeated over 3 recorded days / stochastic SEIR, hourly samples'],['# data','Kissler et al., BBC Pandemic Haslemere dataset; https://github.com/skissler/haslemere'],['# limitation','Nights and homes are not recorded; three days are repeated; not a forecast for any real place'],['# seed',lastSeeds.join(' ')],['# code',lastSource]],keys=Object.keys(allSeries[0]);
+  const meta=[['# model','동현빌 0.70 / 469 people / real 5-minute proximity log repeated over 3 recorded days / stochastic SEIR, hourly samples'],['# data','Kissler et al., BBC Pandemic Haslemere dataset; https://github.com/skissler/haslemere'],['# limitation','Nights and homes are not recorded; three days are repeated; not a forecast for any real place'],['# seed',lastSeeds.join(' ')],['# code',lastSource]],keys=Object.keys(allSeries[0]);
   download('donghyunvil-observations.csv','\ufeff'+meta.map(r=>r.map(esc).join(',')).join('\n')+'\n'+keys.join(',')+'\n'+allSeries.map(s=>keys.map(k=>esc(s[k])).join(',')).join('\n'),'text/csv;charset=utf-8');
 };
 function setup(c,context,h){
@@ -285,9 +285,9 @@ function boxSpec(e){
   const m=e.box,runs=e.runs,C=['currentColor','#8a8170'];if(!m||!runs.length)return null;
   const tags=runTags(runs),num=k=>runs.length>1?`${k+1} · `:'';
   const runRows=(get,empty)=>runs.map((r,k)=>({label:num(k)+(tags[k]||empty),live:r.live,...get(r)}));
-  if(m===1)return {title:'누적 감염 · 재감염',legend:'● 누적 감염 · □ 재감염 (명)',rows:runRows(r=>({vals:[[r.cum,'c',C[0]],[r.reinf,'s',C[0]]],text:`${r.cum} · ${r.reinf}`}),'기준')};
+  if(m===1){const P=runs.some(r=>r.pn);return {title:P?'누적 보균 획득 · 재획득':'누적 감염 · 재감염',legend:P?'● 누적 보균 획득 · □ 재획득 (건)':'● 누적 감염 · □ 재감염 (명)',rows:runRows(r=>({vals:[[r.cum,'c',C[0]],[r.reinf,'s',C[0]]],text:`${r.cum} · ${r.reinf}`}),P?'접종 없음':'기준')};}
   const pn=runs.filter(r=>r.pn);
-  if(m===2)return {title:'접종하지 않은 사람의 평균 보균율',legend:'● 비접종자 · □ 마을 전체 (%)',rows:runRows(r=>r.pn?{vals:[[r.pn.prevUnvac,'c',C[0]],[r.pn.prev,'s',C[1]]],text:f1(r.pn.prevUnvac)+'%'}:{vals:[],text:'–'},'접종 없음'),pct:1};
+  if(m===2)return {title:'비접종자 보균율과 마을 보균율',legend:'● 비접종자 · □ 마을 전체 (%)',rows:runRows(r=>r.pn?{vals:[[r.pn.prevUnvac,'c',C[0]],[r.pn.prev,'s',C[1]]],text:`${f1(r.pn.prevUnvac)} · ${f1(r.pn.prev)}%`}:{vals:[],text:'–'},'접종 없음').map(x=>({...x,label:x.label.replace(/ \d+%(?= ·|$)/g,'')})),pct:1};
   if(m===3)return {title:'최근 30일 혈청형별 보균',legend:'<i style="color:#5f7f9e">●</i> 백신형 · <i style="color:#b5652b">●</i> 비백신형 · <i style="color:#8a4f9e">●</i> X형 (마을 %)',rows:runRows(r=>{const q=r.pn;if(!q)return {vals:[],text:'–'};const x=q.mix&&q.mix[1];return {vals:[[q.last30.VT,'c','#5f7f9e'],[q.last30.NVT,'c','#b5652b'],...(x?[[q.last30.X,'c','#8a4f9e']]:[])],text:`${f1(q.last30.VT)} · ${f1(q.last30.NVT)}${x?' · '+f1(q.last30.X):''}`};},'접종 없음'),pct:1};
   if(m===4)return {title:'기대 IPD (침습도는 가정값)',legend:'● 기대 IPD (건) · 오른쪽: 새 보균',rows:runRows(r=>r.pn?{vals:[[r.pn.ipd,'c',C[0]]],text:`${r.pn.ipd.toFixed(3)} · ${r.pn.acq}건`}:{vals:[],text:'–'},'기준'),dec:3};
   if(m===5)return {title:'아이 보균율과 마을 보균율',legend:'● 아이 · □ 마을 전체 (%)',rows:runRows(r=>r.pn?{vals:[[r.pn.prevChild,'c',C[0]],[r.pn.prev,'s',C[1]]],text:`${f1(r.pn.prevChild)} · ${f1(r.pn.prev)}%`}:{vals:[],text:'–'},'접종 없음'),pct:1};
@@ -320,7 +320,7 @@ function drawBox(){
   const mark=([v,sh,col],y)=>!isFinite(v)?'':sh==='c'?`<circle cx="${x(v)}" cy="${y}" r="4" fill="${col}" stroke="#fff" stroke-width="1"/>`:sh==='s'?`<rect x="${x(v)-3.4}" y="${y-3.4}" width="6.8" height="6.8" fill="#fff" stroke="${col}" stroke-width="1.5"/>`:`<circle cx="${x(v)}" cy="${y}" r="3.6" fill="none" stroke="${col}" stroke-width="1.3" opacity=".75"/>`;
   const rows=s.rows.map((r,i)=>{const H=r.tall?24:14,ys=r.tall?[4.5,12,19.5]:[7,7,7];let g=`<line x1="4" x2="${W-4}" y1="${H/2}" y2="${H/2}" stroke="currentColor" opacity=".15"/>`;if(s.one)g+=`<line x1="${x(1)}" x2="${x(1)}" y1="1" y2="${H-1}" stroke="currentColor" opacity=".35"/>`;
     for(const h of boxHistory)if(h[i]!=null&&isFinite(h[i]))g+=`<circle cx="${x(h[i])}" cy="${ys[0]}" r="3" fill="${r.vals[0]?.[2]||'currentColor'}" opacity=".22"/>`;
-    g+=r.vals.map((v,k)=>mark(v,ys[k])).join('');
+    g+=r.vals.map((v,k)=>[v,k]).sort((p,q)=>(p[0][1]==='c')-(q[0][1]==='c')).map(([v,k])=>mark(v,ys[k])).join('');
     return `<div class="eb-row"><span class="eb-l"${r.col?` style="color:${r.col}"`:''}>${esc(r.label)}${r.live&&busy?' <i>진행 중</i>':''}</span><span class="eb-t">${r.text}</span><svg viewBox="0 0 ${W} ${H}" aria-hidden="true">${g}</svg></div>`;}).join('');
   const step=[.01,.02,.05,.1,.25,.5,1,2,5,10,20,25,50,100].find(d=>mx/d<=5.0001),ticks=[];for(let t=0;t<=mx+1e-9;t+=step)ticks.push(t);const fmt=v=>s.dec?v.toFixed(2):s.one?(+v.toFixed(1))+'':Math.round(v);
   const axis=`<svg viewBox="0 0 ${W} 12" aria-hidden="true">${ticks.map((t,k)=>`<text x="${x(t)}" y="9" font-size="8.5" text-anchor="${x(t)<14?'start':x(t)>W-14?'end':'middle'}" fill="currentColor" opacity=".6">${fmt(t)}${Math.abs(t-mx)<1e-9&&(s.pct||s.fixed)?'%':''}</text>`).join('')}</svg>`;
@@ -366,7 +366,7 @@ function drawChart(){
   cc.restore();
   $('#chart-scale').textContent=`Y축 0–${ymax}명 · 자동 범위 · X축 ${span}일 · 한 시간 간격 표본`;
 }
-window.render_game_to_text=()=>JSON.stringify({app:'동현빌',version:'0.38',busy,state:state?{day:state.day,clock:state.clock,night:state.night,counts:state.counts,cum:state.cum,pathogen:state.pathogenName,index:state.index}:null,coordinates:'960×720, x right, y down; sky strip 44px at top; 469 villagers at fixed positions'});
+window.render_game_to_text=()=>JSON.stringify({app:'동현빌',version:'0.70',busy,state:state?{day:state.day,clock:state.clock,night:state.night,counts:state.counts,cum:state.cum,pathogen:state.pathogenName,index:state.index}:null,coordinates:'960×720, x right, y down; sky strip 44px at top; 469 villagers at fixed positions'});
 let ticking=false;function animate(){if(ticking)return;ticking=true;const frame=()=>{draw();if(busy&&!reduced)requestAnimationFrame(frame);else{ticking=false;draw();drawChart();}};requestAnimationFrame(frame);}
 let chartTimer=0;const chartLoop=()=>{if(busy)drawChart();if(busy)chartTimer=setTimeout(chartLoop,500);};
 new ResizeObserver(()=>{draw();drawChart();}).observe($('.observation'));document.fonts.ready.then(()=>{draw();drawChart();});

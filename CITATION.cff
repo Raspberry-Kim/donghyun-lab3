@@ -2,8 +2,8 @@ cff-version: 1.2.0
 message: "If you use this software, please cite it using the metadata below."
 title: "Donghyunvil (동현빌): an educational village-outbreak laboratory on a real contact network, controlled through the esoteric language Donghyun-lang"
 type: software
-version: "0.38"
-date-released: "2026-10-27"
+version: "0.70"
+date-released: "2026-10-28"
 doi: "10.5281/zenodo.23689490"
 authors:
   - family-names: Kim
