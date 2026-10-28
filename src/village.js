@@ -330,7 +330,7 @@ Object.assign(Village.prototype,{
     const cohorts=new Map(),groups=new Map();
     for(const b of B){
       const key=b.birth+'|'+b.interval;if(!cohorts.has(key))cohorts.set(key,{birth:b.birth,interval:b.interval,n:0,inf:0,ma:[0,0,0]});const co=cohorts.get(key);co.n++;
-      const g=b.prod;if(!groups.has(g))groups.set(g,{prod:g,name:g?RSV_PRODUCTS[g].name:'보호 없음',n:0,inf:0,ma:0,hosp:0,rule:new Set(),short:0});const gr=groups.get(g);gr.n++;gr.rule.add(b.rule);if(g===1&&b.interval<14)gr.short++;
+      const g=b.prod;if(!groups.has(g))groups.set(g,{prod:g,name:g?RSV_PRODUCTS[g].name:'보호 없음',n:0,inf:0,ma:0,hosp:0,rule:new Set(),mab:new Set(),f:new Set(),shed:new Set(),interval:new Set(),short:0});const gr=groups.get(g);gr.n++;gr.rule.add(b.rule);gr.mab.add(b.mabRule);gr.f.add(b.f);gr.shed.add(b.shed);gr.interval.add(b.interval);if(g===1&&b.interval<14)gr.short++;
       for(const t of b.inf){infs++;co.inf++;gr.inf++;
         pair.forEach((r,j)=>{const m=this.rsvProtect(r.k,b,t,'ma'),h=this.rsvProtect(r.k,b,t,'hosp');for(let z=0;z<3;z++){r.ma[z]+=m.v[z];r.hosp[z]+=h.v[z];}if(!m.win)r.out++;if(m.pre)r.pre++;co.ma[j]+=m.v[0];});
         if(g){const m=this.rsvProtect(g,b,t,'ma'),h=this.rsvProtect(g,b,t,'hosp'),fi=b.f/100*m.v[0]/100;gr.ma+=(1-m.v[0]/100)/(1-fi);gr.hosp+=Math.min(1,(1-h.v[0]/100)/(1-fi));}
@@ -341,7 +341,7 @@ Object.assign(Village.prototype,{
     return {babies:B.length,born:born.length,infections:infs,fromBaby:this.fromBaby,seasonStart:this.imp.start,
       pair:pair.map(r=>({...r,ma:mean(r.ma),hosp:mean(r.hosp)})),
       cohorts:[...cohorts.values()].sort((a,b)=>a.birth-b.birth||b.interval-a.interval).map(c=>({...c,ma:c.inf?c.ma.map(x=>x/c.inf):null})),
-      groups:[...groups.values()].sort((a,b)=>a.prod-b.prod).map(g=>({...g,rule:[...g.rule],risk:g.n?g.inf/g.n:0,maRisk:g.n?g.ma/g.n:0,hospRisk:g.n?g.hosp/g.n:0}))};
+      groups:[...groups.values()].sort((a,b)=>a.prod-b.prod).map(g=>({...g,rule:[...g.rule],mab:[...g.mab],f:[...g.f],shed:[...g.shed],interval:[...g.interval],risk:g.n?g.inf/g.n:0,maRisk:g.n?g.ma/g.n:0,hospRisk:g.n?g.hosp/g.n:0}))};
   }
 });
 if(typeof module!=='undefined')module.exports={Village,random,DAY,ACTIVE,NIGHT,PCV_MODEL,RSV_PRODUCTS,PN_INVASIVE,BABY_DEFAULT};

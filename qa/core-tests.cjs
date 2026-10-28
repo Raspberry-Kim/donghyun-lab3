@@ -74,7 +74,7 @@ check('Extension examples tell the intended stories (17~32)',()=>{
   const runs=id=>exec(examples.find(e=>e.id===id).code).state.ext.runs;
   const p2=runs('pn-acq-outcome');assert(p2[1].pn.prevUnvac<p2[0].pn.prevUnvac&&p2[1].pn.prevUnvac<p2[2].pn.prevUnvac,'P2 blocking lowers carriage in the unvaccinated');assert(p2[2].pn.ipdVac<p2[2].pn.ipd,'P2 outcome-only');
   const p3=runs('pn-replacement');assert(p3[1].pn.last30.VT<p3[0].pn.last30.VT&&p3[1].pn.last30.NVT>p3[0].pn.last30.NVT,'P3 replacement');
-  const r1=runs('rsv-waning');assert(r1[1].reinf===0&&r1[2].reinf>0&&r1[3].reinf>r1[2].reinf,'R1 waning');
+  const r1=runs('rsv-waning');assert(r1.length===3&&r1[0].reinf===0&&r1[1].reinf>0&&r1[2].reinf>r1[1].reinf,'R1 waning');
   const r2=runs('rsv-first')[0].rsv.groups;assert(r2[1].maRisk<r2[0].maRisk/2,'R2 first encounter');
   for(const r of runs('rsv-indirect'))assert.strictEqual(r.rsv.fromBaby,0,'R5 structural zero');
   const c1=runs('rsv-trials')[0].rsv.pair;assert.strictEqual(c1.map(p=>p.name).join(','),'아브리스보,베이포투스,엔플론시아');

@@ -104,7 +104,7 @@ function receive(m){
   if(m.type==='ready'){ready=true;status('마을 준비 완료');}
   if(m.type==='done'&&state.pcv){busy=false;status('실험 완료');const q=state.pcv;if(q.acq&&q.red20!=null)pcvHistory.push([q.red20,q.red21]);if(pcvHistory.length>10)pcvHistory.shift();
     $('#result').textContent=state.index?`${state.day}일 동안 폐구균 보균을 지켜봤다. 누적 보균 ${state.cum}명(${(state.cum/469*100).toFixed(1)}%), 65세 이상 접종자 ${q.vaccinated}명 가운데 새 보균 ${q.acq}건. 그 보균의 IPD 위험은 PCV20으로 ${q.acq?q.red20.toFixed(1):'–'}%, PCV21로 ${q.acq?q.red21.toFixed(1):'–'}% 줄었다고 셌다(차이 ${q.acq?(q.red21-q.red20).toFixed(1):'–'}%p). 가정값 위의 계산이다. 아래 설명의 한계를 함께 보자.`:'시간이 흐르지 않았다. 명령 3·7로 첫 보균자·기간을 정해 보자.';}
-  else if(m.type==='done'&&state.ext){busy=false;status('실험 완료');$('#result').textContent=extResult(state);}
+  else if(m.type==='done'&&state.ext){busy=false;status('실험 완료');const bs=boxSpec(state.ext);if(bs){boxHistory.push(bs.rows.map(r=>r.vals[0]?r.vals[0][0]:null));if(boxHistory.length>10)boxHistory.shift();drawBox();}$('#result').textContent=extResult(state);}
   else if(m.type==='done'){busy=false;status('실험 완료');const c=state.counts;$('#result').textContent=state.index?`${state.day}일 동안 ${state.pathogenName} 유행을 지켜봤다. 누적 감염 ${state.cum}명(${(state.cum/469*100).toFixed(1)}%), 접종 ${c.V}명, 감수성자 ${c.S}명이 남았다.`:'시간이 흐르지 않았다. 명령 2·3·7로 병원체·첫 환자·기간을 정해 보자.';}
   if(m.type==='halted'){busy=false;status('중단됨');$('#result').textContent='오겡끼데스까. 실험을 멈췄다. 다시 실행하면 처음부터 시작한다.';}
   if(m.type==='error'){busy=false;status('실행 오류','error');$('#result').textContent=(m.line?m.line+'번 문장: ':'')+m.error;}
@@ -119,7 +119,7 @@ function receive(m){
   $('#m-s').innerHTML=c.S+' <small>명</small>';$('#m-e').innerHTML=c.E+' <small>명</small>';$('#m-i').innerHTML=c.I+' <small>명</small>';$('#m-r').innerHTML=c.R+' <small>명</small>';
   if(state?.pcv){$('#m-v').innerHTML=state.pcv.vaccinated+' <small>명</small>';$('#m-v-note').textContent='성인 PCV · 질병 위험만';}
   else{$('#m-v').innerHTML=c.V+' <small>명</small>';$('#m-v-note').textContent=c.V?`접종 · 면역 ${c.VI}명`:'접종';}
-  drawPcv();drawExt();$('#m-q').innerHTML=c.Q+' <small>명</small>';
+  drawPcv();drawExt();drawBox();$('#m-q').innerHTML=c.Q+' <small>명</small>';
   $('#clock').textContent=(state?`${state.day}일째 ${state.clock}`:'0일째 07:00');$('#clock-note').textContent=state?.index?(state.night?`${DAYNAMES[state.recordDay]}요일 기록 · 밤, 접촉 기록 없음`:`${DAYNAMES[state.recordDay]}요일 기록 위를 지나는 중`):'모의 시간 · 밤은 건너뜀';$('.arena-wrap').classList.toggle('night',!!state?.night);$('#mode').textContent=describe(state);$('#cum-count').textContent='누적 감염 '+(state?.cum||0)+'명';
   $('#step-count').textContent=(m.steps||0).toLocaleString()+'문장';
   if(m.seeds)lastSeeds=m.seeds;
@@ -156,7 +156,7 @@ function prepareScene(d){
 let prevRunCode=null,lastSeeds=[];
 function run(e){const slowRun=e===true;if(!ready||busy)return;dhSlowUI(slowRun);
   if(!ready||busy)return;lastSource=$('#code').value;allSeries=[];archive=[];runIndex=0;series=[];chartPeak=0;sparks=[];ripples=[];contactTrails=[];drawChart();busy=true;$('#welcome').hidden=true;status('실험 중','running');$('#result').textContent=slowRun?'동현랭 명령을 한 줄씩 천천히 실행하고 있다.':'동현랭 명령을 실행하고 있다.';controls();
-  const repeat=lastSource===prevRunCode;if(!repeat)pcvHistory=[];prevRunCode=lastSource;
+  const repeat=lastSource===prevRunCode;if(!repeat){pcvHistory=[];boxHistory=[];}prevRunCode=lastSource;
   worker.postMessage({type:'run',code:lastSource,slow:slowRun,repeat});
   animate();clearTimeout(chartTimer);chartLoop();
 }
@@ -272,6 +272,52 @@ function pairSvg(q){
     [['ma',-5,'c'],['hosp',5,'s']].forEach(([key,dy,sh])=>{const v=r[key];if(!v)return;const yy=y+dy;g+=`<line x1="${x(v[1])}" x2="${x(v[2])}" y1="${yy}" y2="${yy}" stroke="${col}" stroke-width="1.4" opacity=".7"/>`;
       g+=sh==='c'?`<circle cx="${x(v[0])}" cy="${yy}" r="4" fill="${col}"/>`:`<rect x="${x(v[0])-3.6}" y="${yy-3.6}" width="7.2" height="7.2" fill="#fff" stroke="${col}" stroke-width="1.6"/>`;});});
   return `<svg viewBox="0 0 304 ${26+q.pair.length*30}" role="img" aria-label="세 제품을 같은 감염 아기에게 각각 적용한 평균 효과와 시험 신뢰구간">${g}</svg>`;}
+/* 예제 17~32의 작은 결과 상자(명령 29). 실행 중에도 갱신된다. 흐린 점은 같은 코드의 앞선 실행. */
+let boxHistory=[];
+const RULE_NAME={1:'보호자 무작위',2:'보호자 접촉 많음',4:'보호자 접촉 적음'};
+function runTags(runs){
+  const parts=runs.map(r=>r.label.split(' · ').filter(p=>p&&!p.startsWith('유입 ')));
+  if(runs.length===1)return [parts[0].slice(1).join(' · ')];
+  const common=parts[0]?parts[0].filter(p=>parts.every(q=>q.includes(p))):[];
+  return parts.map(q=>q.filter(p=>!common.includes(p)).join(' · '));}
+function boxSpec(e){
+  const m=e.box,runs=e.runs,C=['currentColor','#8a8170'];if(!m||!runs.length)return null;
+  const tags=runTags(runs),num=k=>runs.length>1?`${k+1} · `:'';
+  const runRows=(get,empty)=>runs.map((r,k)=>({label:num(k)+(tags[k]||empty),live:r.live,...get(r)}));
+  if(m===1)return {title:'누적 감염 · 재감염',legend:'● 누적 감염 · □ 재감염 (명)',rows:runRows(r=>({vals:[[r.cum,'c',C[0]],[r.reinf,'s',C[0]]],text:`${r.cum} · ${r.reinf}`}),'기준')};
+  const pn=runs.filter(r=>r.pn);
+  if(m===2)return {title:'접종하지 않은 사람의 평균 보균율',legend:'● 비접종자 · □ 마을 전체 (%)',rows:runRows(r=>r.pn?{vals:[[r.pn.prevUnvac,'c',C[0]],[r.pn.prev,'s',C[1]]],text:f1(r.pn.prevUnvac)+'%'}:{vals:[],text:'–'},'접종 없음'),pct:1};
+  if(m===3)return {title:'최근 30일 혈청형별 보균',legend:'<i style="color:#5f7f9e">●</i> 백신형 · <i style="color:#b5652b">●</i> 비백신형 · <i style="color:#8a4f9e">●</i> X형 (마을 %)',rows:runRows(r=>{const q=r.pn;if(!q)return {vals:[],text:'–'};const x=q.mix&&q.mix[1];return {vals:[[q.last30.VT,'c','#5f7f9e'],[q.last30.NVT,'c','#b5652b'],...(x?[[q.last30.X,'c','#8a4f9e']]:[])],text:`${f1(q.last30.VT)} · ${f1(q.last30.NVT)}${x?' · '+f1(q.last30.X):''}`};},'접종 없음'),pct:1};
+  if(m===4)return {title:'기대 IPD (침습도는 가정값)',legend:'● 기대 IPD (건) · 오른쪽: 새 보균',rows:runRows(r=>r.pn?{vals:[[r.pn.ipd,'c',C[0]]],text:`${r.pn.ipd.toFixed(3)} · ${r.pn.acq}건`}:{vals:[],text:'–'},'기준'),dec:3};
+  if(m===5)return {title:'아이 보균율과 마을 보균율',legend:'● 아이 · □ 마을 전체 (%)',rows:runRows(r=>r.pn?{vals:[[r.pn.prevChild,'c',C[0]],[r.pn.prev,'s',C[1]]],text:`${f1(r.pn.prevChild)} · ${f1(r.pn.prev)}%`}:{vals:[],text:'–'},'접종 없음'),pct:1};
+  const rs=runs.map((r,k)=>[r,k]).filter(([r])=>r.rsv);if(!rs.length)return null;
+  if(m===6){const G=[];for(const [r,k] of rs)for(const g of r.rsv.groups)G.push({r,k,g});
+    const att=x=>{const g=x.g,a=[tags[x.k]||'',g.rule.map(v=>RULE_NAME[v]).join('·')];if(g.prod){if(g.prod>1)a.push(g.mab.map(v=>v?'모두 출생 때 투여':'계절 전 출생은 계절 시작 때').join('·'));a.push('감염 차단 '+g.f.join('·')+'%');a.push('전파 감소 '+g.shed.join('·')+'%');if(g.prod===1)a.push('접종→분만 '+g.interval.join('·')+'일');}return a;};
+    const A=G.map(att),vary=i=>new Set(A.map(a=>a[i]).filter(v=>i===0||v)).size>1;
+    return {title:'아기 100명당 · 배정 군별',legend:'○ 감염 · ● MA-LRTI 상당 · □ 입원 상당',rows:G.map((x,i)=>({label:(rs.length>1?`${x.k+1} · `:'')+x.g.name+A[i].map((v,j)=>v&&vary(j)?' · '+v:'').join(''),live:x.r.live,tall:1,vals:[[x.g.risk*100,'o',C[0]],[x.g.maRisk*100,'c',PROD_COL[x.g.prod]||C[0]],[x.g.hospRisk*100,'s',PROD_COL[x.g.prod]||C[0]]],text:`${f1(x.g.risk*100)} · ${f1(x.g.maRisk*100)} · ${f1(x.g.hospRisk*100)}`}))};}
+  if(m===7){const [r]=rs[rs.length-1],q=r.rsv;
+    return {title:`같은 감염 아기 ${q.infections}건 · 세 제품의 평균 효과`,legend:'● MA-LRTI · □ 입원 (%) · 시험값을 대어 본 계산',fixed:100,
+      rows:q.pair.map(p=>({label:p.name,col:PROD_COL[p.k],vals:p.ma?[[p.ma[0],'c',PROD_COL[p.k]],[p.hosp[0],'s',PROD_COL[p.k]]]:[],text:p.ma?`${f1(p.ma[0])} · ${f1(p.hosp[0])}`:'–'})),
+      more:`근거 창 밖 감염: ${q.pair.map(p=>p.out).join(' · ')}건 · 세 제품을 직접 비교한 시험은 없다`};}
+  if(m===8){const two=rs.filter(([r])=>r.rsv.groups.some(g=>g.prod===1)&&r.rsv.groups.some(g=>g.prod===2));
+    return {title:'입원 비 (베이포투스 군 ÷ 아브리스보 군)',legend:'● 관찰한 비 · □ 같은 아기에 대어 본 비 · 세로선 1',one:1,
+      rows:two.map(([r,k])=>{const G=r.rsv.groups,a=G.find(g=>g.prod===1),b=G.find(g=>g.prod===2),pa=r.rsv.pair.find(x=>x.k===1),pb=r.rsv.pair.find(x=>x.k===2);
+        const obs=a.hospRisk?b.hospRisk/a.hospRisk:null,pr=pa.hosp&&pb.hosp?(1-pb.hosp[0]/100)/(1-pa.hosp[0]/100):null;
+        return {label:`${k+1} · 아브리스보 ${RULE_NAME[a.rule[0]].replace('보호자 ','')} · 베이포투스 ${RULE_NAME[b.rule[0]].replace('보호자 ','')}`,live:r.live,vals:[...(obs!=null?[[obs,'c',C[0]]]:[]),...(pr!=null?[[pr,'s',C[1]]]:[])],text:obs==null?'–':obs.toFixed(2)};})};}
+  return null;}
+function boxMax(s){if(s.fixed)return s.fixed;let v=0;for(const r of s.rows)for(const x of r.vals)if(isFinite(x[0]))v=Math.max(v,x[0]);for(const h of boxHistory)for(const x of h)if(isFinite(x))v=Math.max(v,x);
+  if(s.one)return Math.max(2,Math.ceil(v*1.1*2)/2);if(s.dec)return Math.max(.02,Math.ceil(v*1.15*50)/50);if(s.pct)return Math.max(5,Math.ceil(v*1.1/5)*5);return niceMax(Math.max(10,v*1.1));}
+function drawBox(){
+  const el=$('#ext-box'),e=state?.ext,s=e&&boxSpec(e);if(!s||!s.rows.length){el.hidden=true;return;}el.hidden=false;
+  const W=240,mx=boxMax(s),x=v=>4+(W-8)*Math.max(0,Math.min(v,mx))/mx;
+  const mark=([v,sh,col],y)=>!isFinite(v)?'':sh==='c'?`<circle cx="${x(v)}" cy="${y}" r="4" fill="${col}" stroke="#fff" stroke-width="1"/>`:sh==='s'?`<rect x="${x(v)-3.4}" y="${y-3.4}" width="6.8" height="6.8" fill="#fff" stroke="${col}" stroke-width="1.5"/>`:`<circle cx="${x(v)}" cy="${y}" r="3.6" fill="none" stroke="${col}" stroke-width="1.3" opacity=".75"/>`;
+  const rows=s.rows.map((r,i)=>{const H=r.tall?24:14,ys=r.tall?[4.5,12,19.5]:[7,7,7];let g=`<line x1="4" x2="${W-4}" y1="${H/2}" y2="${H/2}" stroke="currentColor" opacity=".15"/>`;if(s.one)g+=`<line x1="${x(1)}" x2="${x(1)}" y1="1" y2="${H-1}" stroke="currentColor" opacity=".35"/>`;
+    for(const h of boxHistory)if(h[i]!=null&&isFinite(h[i]))g+=`<circle cx="${x(h[i])}" cy="${ys[0]}" r="3" fill="${r.vals[0]?.[2]||'currentColor'}" opacity=".22"/>`;
+    g+=r.vals.map((v,k)=>mark(v,ys[k])).join('');
+    return `<div class="eb-row"><span class="eb-l"${r.col?` style="color:${r.col}"`:''}>${esc(r.label)}${r.live&&busy?' <i>진행 중</i>':''}</span><span class="eb-t">${r.text}</span><svg viewBox="0 0 ${W} ${H}" aria-hidden="true">${g}</svg></div>`;}).join('');
+  const step=[.01,.02,.05,.1,.25,.5,1,2,5,10,20,25,50,100].find(d=>mx/d<=5.0001),ticks=[];for(let t=0;t<=mx+1e-9;t+=step)ticks.push(t);const fmt=v=>s.dec?v.toFixed(2):s.one?(+v.toFixed(1))+'':Math.round(v);
+  const axis=`<svg viewBox="0 0 ${W} 12" aria-hidden="true">${ticks.map((t,k)=>`<text x="${x(t)}" y="9" font-size="8.5" text-anchor="${x(t)<14?'start':x(t)>W-14?'end':'middle'}" fill="currentColor" opacity=".6">${fmt(t)}${Math.abs(t-mx)<1e-9&&(s.pct||s.fixed)?'%':''}</text>`).join('')}</svg>`;
+  el.innerHTML=`<b>${esc(s.title)}</b>${rows}${axis}<small>${s.legend}${boxHistory.length?` · 흐린 점: 이 코드 ${boxHistory.length}회`:''}</small>${s.more?`<small class="pcv-more">${esc(s.more)}</small>`:''}`;}
 function drawExt(){
   const el=$('#ext-panel'),e=state?.ext;if(!e||!e.runs.length){el.hidden=true;return;}el.hidden=false;
   const runs=e.runs;let h='<div class="section-title"><h2>실행별 결과</h2><span>예제 17~32 · 계산값 · 진료·정책 결정 도구가 아니다</span></div>';
