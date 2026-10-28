@@ -1,7 +1,7 @@
 let slow=false;
 /* 동현빌의 계산 스레드. 바뀌지 않은 동현랭 실행기가 출력한 정수 묶음만 마을에 전달한다. */
 let D,village,world,vm,running=false,runId=0,steps=0,pending=0,token='',packet=[],queue=[],logs=[],wallStart=0,sentSeries=0,nightHold=0,eventsBuffer=[],lastContacts=[];
-const arity={1:1,2:1,3:1,4:1,5:2,6:1,7:1,8:1,9:1,10:1,11:1,12:1,13:1,14:1,15:2,16:2,17:1,18:1,19:1,20:1,21:1,22:2,23:2,24:3,25:2,26:1,27:2,28:1};
+const arity={1:1,2:1,3:1,4:1,5:2,6:1,7:1,8:1,9:1,10:1,11:1,12:1,13:1,14:1,15:2,16:2,17:1,18:1,19:1,20:1,21:1,22:2,23:2,24:3,25:2,26:1,27:2,28:1,29:1};
 const FRAME_MS=160/3,SPEED_STEPS={1:2,2:8,3:32},NIGHT_HOLD={1:10,2:6,3:1},MAX_DAYS=365;
 const assert=(ok,msg)=>{if(!ok)throw Error(msg);};
 const range=(x,a,b,name)=>assert(Number.isSafeInteger(x)&&x>=a&&x<=b,`${name}: ${a}~${b} 정수여야 한다.`);
@@ -13,7 +13,7 @@ function log(text){logs.push({day:village?village.time/DAY:0,text});if(logs.leng
 let seedOffset=0,seedsUsed=[];
 function pickSeedOffset(){const u=new Uint32Array(1);if(typeof crypto!=='undefined'&&crypto.getRandomValues)crypto.getRandomValues(u);else u[0]=Math.floor(Math.random()*4294967296);return 1+u[0]%2147483646;}
 function runSeed(s){return seedOffset?(s-1+seedOffset)%2147483647+1:s;}
-let programRuns=[];
+let programRuns=[],boxMode=0;
 function resetWorld(seed){
   if(village.ext&&village.time>0&&world)programRuns.push(runSummary());
   village.reset(seed);
@@ -50,7 +50,7 @@ function command(op,a){
     case 8:{range(a[0],1,16,'관측 항목');const v=village.observe(a[0]);assert(queue.length<256,'관측 입력 큐가 가득 찼다.');queue.push(v);log(`관측 ${a[0]} ${OBS[a[0]]} → ${v}`);break;}
     case 9:{range(a[0],0,2,'격리 정책');village.isolationMode=a[0];world.isolationMode=a[0];
       if(a[0]===2)for(let i=1;i<=village.N;i++)if(village.state[i]===2&&!village.contactsWhileInfectious.has(i))village.contactsWhileInfectious.set(i,new Set());
-      log('격리 정책 '+a[0]+' · '+ISO[a[0]]);break;}
+      if(village.pathogen?.id>=6&&a[0])label(a[0]===1?'증상자 격리':'증상자·접촉자 격리');log('격리 정책 '+a[0]+' · '+ISO[a[0]]);break;}
     case 10:world.tags.push({day:village.time/DAY,value:a[0]});log('동현랭 기록: '+a[0]);break;
     case 11:range(a[0],1,3,'재생 속도');world.speed=a[0];log('재생 속도 '+['','느리게','보통','빠르게'][a[0]]);break;
     case 12:{range(a[0],0,469,'65세 이상 표시 인원');needPcv();notStarted('65세 이상 표시');const n=village.tagOlder(a[0]);
@@ -61,6 +61,7 @@ function command(op,a){
   }
 }
 /* 확장 명령 14~28 (예제 17부터). 병원체 6·7과 새 명령에서만 마을의 확장 층(village.ext)을 켠다. */
+const BOX_NAMES={1:'누적 감염·재감염',2:'접종하지 않은 사람의 보균율',3:'혈청형별 보균',4:'기대 IPD',5:'아이·마을 보균율',6:'아기 배정 군',7:'세 제품을 같은 아기에',8:'관찰한 입원 비'};
 const PRODUCT_NAMES={0:'보호 없음',1:'아브리스보(산모 접종)',2:'베이포투스(항체주사)',3:'엔플론시아(항체주사)'};
 const needBabyPathogen=()=>assert(village.pathogen&&(village.pathogen.id===6||village.pathogen.id===7),'아기·아이 층은 병원체 6(폐구균 풍토 보균)이나 7(RSV)에서 쓴다.');
 const needRsv=n=>assert(village.pathogen?.id===7,`명령 ${n}은 병원체 7(RSV)을 고른 뒤에 쓴다.`);
@@ -92,6 +93,7 @@ function extCommand(op,a){
     case 27:{assert(a[0]===3||a[0]===7,'함께 돌릴 바이러스: 3 인플루엔자, 7 RSV');range(a[1],1,10,'바이러스 배수');needPn(27);assert(!village.virus,'바이러스는 한 실행에 하나만 함께 돌린다.');
       const i=village.startVirus(a[0],a[1]);label(`${village.virus.p.name} 배수 ${a[1]}`);log(`${village.virus.p.name} 함께 돌림 · 오늘부터 3일마다 1명이 바깥에서 감염되어 들어온다 · 바이러스 전염 중엔 폐구균 획득·전파·IPD 위험 ${a[1]}배 (가정값)`);break;}
     case 28:range(a[0],0,100,'항체의 전파 감소');needRsv(28);village.next.shed=a[0];log(`다음 보호 아기: 보호 기간 안에 감염되면 보호자에게 옮길 위험 ${a[0]}% 감소 (가정값)`);break;
+    case 29:range(a[0],0,8,'결과 상자');boxMode=a[0];log(a[0]?`결과 상자 ${a[0]} · ${BOX_NAMES[a[0]]} · 결과와 무관`:'결과 상자를 내린다');break;
   }
 }
 function runSummary(){
@@ -105,6 +107,7 @@ function extState(){
   const out={runs:programRuns.concat(v.time>0?[{...runSummary(),live:running}]:[]),reinf:v.reinf,imports:v.imp.count,wane:v.wane/DAY};
   if(v.pathogen?.sis)out.pn=v.pnSummary();
   if(v.babies.length&&v.pathogen?.id===7)out.rsv=v.rsvSummary();
+  out.box=boxMode;
   return out;
 }
 function extArrays(){
@@ -174,7 +177,7 @@ onmessage=({data:m})=>{
     if(m.type==='run'){
       assert(typeof m.code==='string'&&m.code.length<=100000,'코드는 100,000자까지다.');
       const candidate=new Donghyun.VM(m.code,{write,readInt:()=>{assert(queue.length>0,'명령 8로 관측을 요청한 뒤 꽥꽥으로 읽어라.');return queue.shift();}});
-      runId++;seedOffset=m.repeat?pickSeedOffset():0;seedsUsed=[];village.reset(1);programRuns=[];resetWorld(runSeed(1));logs=[];steps=0;packet=[];token='';pending=0;vm=candidate;slow=!!m.slow;running=true;wallStart=performance.now();log(seedOffset?'동현랭 프로그램 시작 · 같은 코드를 다시 실행해 새 시드를 쓴다':'동현랭 프로그램 시작');snapshot();loop(runId);
+      runId++;seedOffset=m.repeat?pickSeedOffset():0;seedsUsed=[];village.reset(1);programRuns=[];boxMode=0;resetWorld(runSeed(1));logs=[];steps=0;packet=[];token='';pending=0;vm=candidate;slow=!!m.slow;running=true;wallStart=performance.now();log(seedOffset?'동현랭 프로그램 시작 · 같은 코드를 다시 실행해 새 시드를 쓴다':'동현랭 프로그램 시작');snapshot();loop(runId);
     }
   }catch(e){fail(e);}
 };
