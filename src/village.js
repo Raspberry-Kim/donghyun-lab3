@@ -6,7 +6,7 @@ function random(seed){let x=seed>>>0;return()=>((x=(Math.imul(1664525,x)+1013904
 const S=0,E=1,I=2,R=3;
 const DAY=288,ACTIVE=192,NIGHT=96;
 /* 병원체 5(폐구균 보균)의 성인 PCV 결과 층. 보균 획득 1건마다 혈청형 묶음을 하나 뽑고, PCV 접종자이면 그 묶음이 백신에 들어 있을 때
-   그 보균이 침습질환(IPD)이 될 위험을 혈청형당 효과만큼 줄인다고 센다. 보균과 전파에는 영향이 없다(결과만 줄이는 접종).
+   그 보균이 침습질환(IPD)이 될 위험을 혈청형당 효과만큼 줄인다고 센다. 보균과 전파에는 영향이 없다(PPSV 접종).
    묶음 비율: 질병관리청 「폐렴구균 백신 효과평가」 최종결과보고서(2026) 그림 27(B), 65세 이상 IPD 2023–2025의 PCV20 51.0%·PCV21 57.1%.
    공통형 44.0%로 나눈 고유형 비율(PCV20만 7.0%, PCV21만 13.1%)은 가정이다. 혈청형당 효과 50.2%는 미국 PCV20 실사용 값
    (모든 혈청형 IPD 25.6%, Miles 등 Lancet Infect Dis 2026)을 PCV20 포괄률 51.0%로 나눈 보정값이며 두 백신에 같게 준다. */
@@ -196,7 +196,7 @@ Object.assign(Village.prototype,{
     this.strain=new Uint8Array(N+1);this.mix=null;this.pnVac=new Uint8Array(N+1);this.leakyEff=0;this.outEff=0;this.coverX=1;
     this.pn={acq:[0,0,0,0],acqVac:0,acqUnvac:0,ipd:0,ipdVac:0,ipdUnvac:0,samples:0,prev:0,prevUnvac:0,prevType:[0,0,0,0],prevChild:0,leaky:0,out:0,childLeaky:0};
     this.virus=null;this.babies=[];this.babyOf=new Int32Array(N+1).fill(-1);this.fromBaby=0;
-    this.next={birth:0,prod:0,f:0,interval:35,mabRule:0,shed:0};this.babyQ=null;this.labels=[];
+    this.next={birth:0,prod:0,f:0,interval:35,mabRule:0,shed:0};this.abAdd=false;this.babyQ=null;this.labels=[];
   },
   enableExt(){this.ext=true;},
   setWane(days){this.enableExt();this.wane=days*DAY;},
@@ -262,7 +262,11 @@ Object.assign(Village.prototype,{
   babyH(){const q=this.babyQ,p=this.pathogen,Dcg=p.infectiousSteps/DAY;
     return {hin:-Math.log(1-Math.min(q.qin,99.9)/100)/(Dcg*NIGHT),hout:-Math.log(1-Math.min(q.qout,99.9)/100)/(q.infDays*NIGHT)};},
   doseDay(b){return b.mabRule===1||this.imp.start<0?b.birth:Math.max(b.birth,this.imp.start);},
+  /* 아브리스보 아기의 추가 항체주사(명령 21 값 2, 한국·미국 지침): 접종→분만 14일 미만이거나 계절 전(4~9월)에 태어난 아기는
+     출생일과 계절 시작일 가운데 늦은 날 베이포투스를 맞는다. 그날부터는 베이포투스 시험값만 쓴다(두 제품을 합친 효과는 근거가 없어 더하지 않는다). */
+  abAddDay(b){return this.abAdd&&this.imp.start>=0&&(b.interval<14||b.birth<this.imp.start)?Math.max(b.birth,this.imp.start):null;},
   rsvProtect(k,b,t,end){
+    if(k===1){const d=this.abAddDay(b);if(d!==null&&t>=d){const w=RSV_PRODUCTS[2][end].find(w=>t-d>=w[0]&&t-d<w[1]);return w?{v:[w[2],w[3],w[4]],win:true,add:true}:{v:[0,0,0],win:false,add:true};}}
     const P=RSV_PRODUCTS[k];if(!P)return null;const start=P.from==='birth'?b.birth:this.doseDay(b);
     if(t<start)return {v:[0,0,0],win:false,pre:true};
     const s=t-start,w=P[end].find(w=>s>=w[0]&&s<w[1]);if(!w)return {v:[0,0,0],win:false};
@@ -308,7 +312,7 @@ Object.assign(Village.prototype,{
   virusResolve(){const v=this.virus;for(const s of v.touched){if(this.rng4()<1-Math.exp(-v.hz[s])){v.state[s]=1;v.tE[s]=this.time;v.cum++;}v.hz[s]=0;}v.touched.length=0;},
   virusTransitions(){const v=this.virus;for(let i=1;i<=this.N;i++){const s=v.state[i];
     if(s===1&&this.time-v.tE[i]>=v.p.latentSteps){v.state[i]=2;v.tI[i]=this.time;}else if(s===2&&this.time-v.tI[i]>=v.p.infectiousSteps)v.state[i]=3;}},
-  /* 폐구균 접종: 1 보균 차단형(PCV형, 누수형 · 백신형 획득 위험을 효과만큼 줄임), 2 결과만 줄이는 형(다당류형 · 보균은 그대로, 백신형 보균의 IPD 위험만 줄임) */
+  /* 폐구균 접종: 1 PCV(누수형 · 백신형 획득 위험을 효과만큼 줄임), 2 PPSV(보균은 그대로, 백신형 보균의 IPD 위험만 줄임) */
   pnVaccinate(n,eff,kind,target){
     this.enableExt();if(kind===1)this.leakyEff=eff;else this.outEff=eff;let done=0;
     if(target===2){const pool=this.babies.filter(b=>!b.leaky);for(let k=pool.length-1;k>0;k--){const j=Math.floor(this.rng3()*(k+1));[pool[k],pool[j]]=[pool[j],pool[k]];}
@@ -330,7 +334,7 @@ Object.assign(Village.prototype,{
     const cohorts=new Map(),groups=new Map();
     for(const b of B){
       const key=b.birth+'|'+b.interval;if(!cohorts.has(key))cohorts.set(key,{birth:b.birth,interval:b.interval,n:0,inf:0,ma:[0,0,0]});const co=cohorts.get(key);co.n++;
-      const g=b.prod;if(!groups.has(g))groups.set(g,{prod:g,name:g?RSV_PRODUCTS[g].name:'보호 없음',n:0,inf:0,ma:0,hosp:0,rule:new Set(),mab:new Set(),f:new Set(),shed:new Set(),interval:new Set(),short:0});const gr=groups.get(g);gr.n++;gr.rule.add(b.rule);gr.mab.add(b.mabRule);gr.f.add(b.f);gr.shed.add(b.shed);gr.interval.add(b.interval);if(g===1&&b.interval<14)gr.short++;
+      const g=b.prod;if(!groups.has(g))groups.set(g,{prod:g,name:g?RSV_PRODUCTS[g].name:'보호 없음',n:0,inf:0,ma:0,hosp:0,rule:new Set(),mab:new Set(),f:new Set(),shed:new Set(),interval:new Set(),short:0,add:0});const gr=groups.get(g);gr.n++;gr.rule.add(b.rule);gr.mab.add(b.mabRule);gr.f.add(b.f);gr.shed.add(b.shed);gr.interval.add(b.interval);if(g===1&&b.interval<14)gr.short++;if(g===1&&this.abAddDay(b)!==null)gr.add++;
       for(const t of b.inf){infs++;co.inf++;gr.inf++;
         pair.forEach((r,j)=>{const m=this.rsvProtect(r.k,b,t,'ma'),h=this.rsvProtect(r.k,b,t,'hosp');for(let z=0;z<3;z++){r.ma[z]+=m.v[z];r.hosp[z]+=h.v[z];}if(!m.win)r.out++;if(m.pre)r.pre++;co.ma[j]+=m.v[0];});
         if(g){const m=this.rsvProtect(g,b,t,'ma'),h=this.rsvProtect(g,b,t,'hosp'),fi=b.f/100*m.v[0]/100;gr.ma+=(1-m.v[0]/100)/(1-fi);gr.hosp+=Math.min(1,(1-h.v[0]/100)/(1-fi));}

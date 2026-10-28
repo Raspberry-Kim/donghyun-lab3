@@ -45,7 +45,7 @@ function command(op,a){
     case 4:{range(a[0],1,469,'접종할 사람 번호');needPathogen();const n=village.vaccinate(a[0]);world.vaccinations+=n;log(n?`${a[0]}번 접종 · 효과 ${village.effectiveVE()}%`:`${a[0]}번은 접종 대상이 아니다(이미 접종했거나 감염 상태)`);break;}
     case 5:{range(a[0],0,469,'접종 인원');range(a[1],1,4,'접종 규칙');needPathogen();const n=village.vaccinateRule(a[0],a[1]);world.vaccinations+=n;log(`${RULES[a[1]]} ${n}명 접종 · 효과 ${village.effectiveVE()}%`+(n<a[0]?` · 대상 부족으로 ${a[0]-n}명은 접종하지 못함`:''));break;}
     case 6:range(a[0],0,100,'백신 효과');village.ve=a[0];world.ve=a[0];log(`백신 효과 ${a[0]}% (이후 접종에 적용)`);break;
-    case 7:{range(a[0],1,MAX_DAYS,'진행 일수');needPathogen();assert(village.index||village.imp.every>0,'명령 3으로 첫 환자를 정한 뒤 시간을 진행하라.');
+    case 7:{range(a[0],1,MAX_DAYS,'진행 일수');needPathogen();assert(village.index||village.imp.every>0||village.imp.start>=0,'명령 3으로 첫 환자를 정한 뒤 시간을 진행하라.');
       assert(world.totalDays+a[0]<=MAX_DAYS,`한 실행의 모의 기간은 ${MAX_DAYS}일까지다.`);world.totalDays+=a[0];pending+=a[0]*DAY;log(`${a[0]}일 진행 시작`);break;}
     case 8:{range(a[0],1,16,'관측 항목');const v=village.observe(a[0]);assert(queue.length<256,'관측 입력 큐가 가득 찼다.');queue.push(v);log(`관측 ${a[0]} ${OBS[a[0]]} → ${v}`);break;}
     case 9:{range(a[0],0,2,'격리 정책');village.isolationMode=a[0];world.isolationMode=a[0];
@@ -80,15 +80,15 @@ function extCommand(op,a){
     case 18:range(a[0],0,3,'보호 전략');needRsv(18);village.next.prod=a[0];log('다음 아기의 보호 전략: '+PRODUCT_NAMES[a[0]]);break;
     case 19:range(a[0],0,100,'감염을 막는 몫');needRsv(19);village.next.f=a[0];log(`다음 보호 아기: 효과 가운데 ${a[0]}%는 감염 자체를 막고, 나머지는 감염 뒤 결과를 줄인다고 둔다`);break;
     case 20:range(a[0],0,120,'산모 접종→분만 간격');needRsv(20);village.next.interval=a[0];log(`다음 아기의 산모 접종→분만 간격 ${a[0]}일`+(a[0]<14?' · 14일 미만이라 효과를 32/82배로 줄인다':''));break;
-    case 21:range(a[0],0,1,'항체주사 투여 규칙');needRsv(21);village.next.mabRule=a[0];log('다음 아기의 항체주사 투여: '+(a[0]?'출생 때':'계절 안 출생은 출생 때, 계절 전 출생은 계절 시작 때'));break;
+    case 21:range(a[0],0,2,'항체주사 투여 규칙');needRsv(21);if(a[0]===2){village.abAdd=true;label('아브리스보 아기 지침 추가 투여');log('이 마을의 아브리스보 아기: 접종→분만 14일 미만이거나 계절 전(4~9월)에 태어나면 출생일과 계절 시작일 가운데 늦은 날 베이포투스를 추가로 맞는다 (한국·미국 지침)');break;}village.next.mabRule=a[0];log('다음 아기의 항체주사 투여: '+(a[0]?'출생 때':'계절 안 출생은 출생 때, 계절 전 출생은 계절 시작 때'));break;
     case 22:range(a[0],0,99,'보호자→아기 전파 확률');range(a[1],0,99,'아기→보호자 전파 확률');needBabyPathogen();assert(village.babies.length,'먼저 명령 16으로 아기·아이를 붙여라.');
       village.babyQ.qin=a[0];village.babyQ.qout=a[1];label(`가구 전파 ${a[0]}/${a[1]}%`);log(`가구 전파 · 보호자 한 번의 전염 기간에 아기에게 ${a[0]}%, 아기 한 번의 전염 기간에 보호자에게 ${a[1]}%`);break;
     case 23:range(a[0],0,100,'백신형 비율');range(a[1],0,100-a[0],'X형 비율');needPn(23);village.setMix(a[0],a[1]);log(`혈청형 섞기 · 백신형 ${a[0]}% · X형 ${a[1]}% · 비백신형 ${100-a[0]-a[1]}% (새 획득·유입에 적용)`);break;
     case 24:{range(a[0],0,469,'접종 인원');range(a[1],0,100,'보균 차단 효과');range(a[2],1,2,'대상');needPn(24);assert(village.mix,'먼저 명령 23으로 혈청형 섞기를 정하라.');
-      if(a[2]===2)assert(village.babies.length,'먼저 명령 16으로 가상 아이를 붙여라.');const n=village.pnVaccinate(a[0],a[1],1,a[2]);label(`보균 차단형 ${a[2]===2?'아이 ':''}${n}명 ${a[1]}%`);
-      log(`보균 차단형 접종 ${a[2]===2?'가상 아이':'마을 사람'} ${n}명 · 백신형 보균 획득 위험 ${a[1]}% 감소`);break;}
-    case 25:{range(a[0],0,469,'접종 인원');range(a[1],0,100,'IPD 감소 효과');needPn(25);assert(village.mix,'먼저 명령 23으로 혈청형 섞기를 정하라.');const n=village.pnVaccinate(a[0],a[1],2,1);label(`결과만 줄이는 형 ${n}명 ${a[1]}%`);
-      log(`결과만 줄이는 접종 ${n}명 · 보균은 그대로, 백신형 보균의 IPD 위험 ${a[1]}% 감소`);break;}
+      if(a[2]===2)assert(village.babies.length,'먼저 명령 16으로 가상 아이를 붙여라.');const n=village.pnVaccinate(a[0],a[1],1,a[2]);label(`PCV ${a[2]===2?'아이 ':''}${n}명 ${a[1]}%`);
+      log(`PCV 접종 ${a[2]===2?'가상 아이':'마을 사람'} ${n}명 · 백신형 보균 획득 위험 ${a[1]}% 감소`);break;}
+    case 25:{range(a[0],0,469,'접종 인원');range(a[1],0,100,'IPD 감소 효과');needPn(25);assert(village.mix,'먼저 명령 23으로 혈청형 섞기를 정하라.');const n=village.pnVaccinate(a[0],a[1],2,1);label(`PPSV ${n}명 ${a[1]}%`);
+      log(`PPSV 접종 ${n}명 · 보균은 그대로, 백신형 보균의 IPD 위험 ${a[1]}% 감소`);break;}
     case 26:range(a[0],0,1,'X형 포함');needPn(26);assert(village.mix,'먼저 명령 23으로 혈청형 섞기를 정하라.');village.coverX=a[0];village.enableExt();log(a[0]?'백신에 X형 포함':'백신에서 X형을 뺌 · 이제 X형 획득은 막지 못한다');break;
     case 27:{assert(a[0]===3||a[0]===7,'함께 돌릴 바이러스: 3 인플루엔자, 7 RSV');range(a[1],1,10,'바이러스 배수');needPn(27);assert(!village.virus,'바이러스는 한 실행에 하나만 함께 돌린다.');
       const i=village.startVirus(a[0],a[1]);label(`${village.virus.p.name} 배수 ${a[1]}`);log(`${village.virus.p.name} 함께 돌림 · 오늘부터 3일마다 1명이 바깥에서 감염되어 들어온다 · 바이러스 전염 중엔 폐구균 획득·전파·IPD 위험 ${a[1]}배 (가정값)`);break;}
