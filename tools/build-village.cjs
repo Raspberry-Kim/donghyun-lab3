@@ -88,7 +88,11 @@ const pathogens=[
   {id:4,name:'BBC 팬데믹 모의 독감',en:'bbc-pandemic',R0:null,a:1,latentSteps:5,infectiousSteps:859,rho:10,cutoff:20,ve:50,
    note:'다큐멘터리 설정: a=1, ρ=10 m, 차단 20 m, 감염 25분(5단계) 뒤 전염, 감염 사흘 뒤(원 모의의 572 기록 단계) 회복. R0는 문헌값이 아니라 이 설정의 결과다.'},
   {id:5,name:'폐구균 보균',en:'pneumococcal-carriage',R0:2,latentDays:1,infectiousDays:49,rho:10,cutoff:50,ve:0,
-   note:'보균 기간은 성인 종단연구 중앙값 7주(49일). R0 2는 문헌값이 아니라 1년 동안 성인 다수가 한 번쯤 보균하도록 둔 가정값이다(성인 획득률 16.5건/1,000인-주 참고). 보균이 끝나면 이 실행 안에서는 다시 보균하지 않는다. 기본 백신 효과 0%: 성인 PCV는 보균을 막지 않고 명령 13으로 질병 위험만 줄인다고 둔다.'}
+   note:'보균 기간은 성인 종단연구 중앙값 7주(49일). R0 2는 문헌값이 아니라 1년 동안 성인 다수가 한 번쯤 보균하도록 둔 가정값이다(성인 획득률 16.5건/1,000인-주 참고). 보균이 끝나면 이 실행 안에서는 다시 보균하지 않는다. 기본 백신 효과 0%: 성인 PCV는 보균을 막지 않고 명령 13으로 질병 위험만 줄인다고 둔다.'},
+  {id:6,name:'폐구균 풍토 보균',en:'pneumococcal-endemic',R0:0.7,latentDays:1,infectiousDays:49,rho:10,cutoff:50,ve:0,sis:true,
+   note:'보균이 끝나면 곧바로 다시 보균될 수 있다(S→C→S). 보균 기간은 성인 종단연구 중앙값 7주(49일). 평균 R 0.7은 문헌값이 아니라, 마을 밖 유입(7일마다 1명)과 함께 돌렸을 때 성인 보균율이 5~10%(CDC Pink Book)에 머물도록 고른 가정값이다. 유입 없이는 대개 꺼진다.'},
+  {id:7,name:'RSV',en:'rsv',R0:3,latentDays:4,infectiousDays:9,rho:10,cutoff:50,ve:0,
+   note:'R0 약 3(1~5, eClinicalMedicine 2025 체계적 고찰). 노출 뒤 감염까지 평균 5.1일·흔한 잠복 4~6일에서 배출이 증상 1~2일 전부터 시작한다고 보아 잠복 4일. 15세 이상 배출 기간 9일(Munywoki 등 JID 2015). 면역 지속은 기본이 유지이며 명령 14로 줄인다.'}
 ];
 const Kall=new Map();
 for(const [,a,b,d] of rows){const k=key(a,b);Kall.set(k,(Kall.get(k)||0)+Math.exp(-d/10));}

@@ -59,9 +59,33 @@ Kissler 등이 다큐멘터리 모의에 쓴 규칙을 따른다. 거리 d인 �
 - 접종 규칙 2·4는 사흘간 4 m 이내 접촉 상대 수로 순서를 정한다. 실제 정책이 이런 순서를 알 수 있다는 뜻은 아니다.
 - 격리 정책 1은 전염이 시작되고 하루 뒤에 격리한다. 홍역처럼 발진 전부터 전염되는 병에서는 이미 나흘 가까이 전염한 뒤일 수 있다는 점이 그대로 결과에 드러난다. 정책 2의 접촉자 격리 14일은 병원체와 무관한 고정값이며, 검사·추적의 지연과 누락은 없다.
 
+## 확장 층의 근거 (예제 17~32)
+
+병원체 6·7과 명령 14~28은 교과서와 시험의 숫자를 마을 위에 올려 보는 장치다. 아래 값 가운데 '가정'이라고 적은 것은 문헌의 직접 수치가 아니다.
+
+**폐구균 풍토 보균 (병원체 6).**
+- 보균 49일, 보균이 끝나면 곧바로 다시 감수성자. 보균 기간과 가구 내 전파는 [Melegaro 등 2004](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2870123/pdf/15188713.pdf)를 참고했다. 평균 재생산수 0.7은 바깥 유입과 함께 평균 보균율 5~10%가 되도록 맞춘 보정값이며 실제 R₀가 아니다.
+- 침습도(보균 10만 건당 IPD 구분 없음 10, 백신형 20, 비백신형 5, X형 40)는 가정이다. 혈청형마다 침습도가 다르다는 점은 [혈청형별 침습도 연구](https://www.sciencedirect.com/science/article/pii/S1755436523000671)와 [Almeida 등](https://academic.oup.com/jid/article/223/9/1590/5900685)을 따랐다.
+- 보균 차단형 효과 62%(예제 18)는 PCV의 백신형 보균 감소 범위([le Polain de Waroux 등 2015](https://journals.lww.com/pidj/fulltext/2015/08000/the_efficacy_and_duration_of_protection_of.15.aspx), [말라위 연구](https://pmc.ncbi.nlm.nih.gov/articles/PMC11056720/)), 결과만 줄이는 형은 다당류 백신이 보균에 영향을 주지 않는다는 [CDC Pink Book](https://www.cdc.gov/pinkbook/hcp/table-of-contents/chapter-17-pneumococcal-disease.html)의 설명을 따랐다.
+- 혈청형 대체(예제 19)는 [Simonsen 등](https://pmc.ncbi.nlm.nih.gov/articles/PMC3025524/), [Ladhani 등](https://pubmed.ncbi.nlm.nih.gov/29395999/), [유럽 10개국 자료](https://pmc.ncbi.nlm.nih.gov/articles/PMC8714201/), 형 사이 경쟁 [0.8 추정](https://link.springer.com/article/10.1186/1471-2334-13-180)을 참고했다. 마을에는 형 사이 경쟁이 없고, 빈자리는 유입 섞기로만 채워진다.
+- 벨기에 19A(예제 20)는 [Emerging Infectious Diseases 보고](https://wwwnc.cdc.gov/eid/article/28/8/21-2440_article)를 따랐다.
+- 바이러스 배수(예제 21)는 가정이다. 인플루엔자·RSV 뒤 폐구균 질환이 느는 관계는 [McCullers](https://pmc.ncbi.nlm.nih.gov/articles/PMC1539103/), [2024 medRxiv 연구](https://www.medrxiv.org/content/10.1101/2024.02.08.24302534v1), [Carrim 등](https://academic.oup.com/ofid/article/12/6/ofaf267/8154395)을 참고했다.
+- 가상 아이의 보균 51일, 전파 30%, 바깥 획득 0.825%는 가정이다. 어린이집 보균은 [핀란드 연구](https://pmc.ncbi.nlm.nih.gov/articles/PMC2639357/)를 참고했다.
+
+**RSV (병원체 7).**
+- R₀ 3은 [R₀ 체계적 고찰](https://www.thelancet.com/journals/eclinm/article/PIIS2589-5370(25)00284-6/fulltext)의 범위 안에서 고른 값, 잠복 4일·전염 9일, 아기 전염 18일은 [Munywoki 등 2015](https://pmc.ncbi.nlm.nih.gov/articles/PMC4411640/)와 [Hall 1991](https://pubmed.ncbi.nlm.nih.gov/2010624/)을 참고했다. 재감염은 [Hall 1991](https://pubmed.ncbi.nlm.nih.gov/2010624/)을 따랐다.
+- 보호자↔아기 전파 26.8%·23.8%는 [Saravanos 등 가구 2차 발병률](https://onlinelibrary.wiley.com/doi/10.1111/irv.70270), 형제의 위험은 [JID 2021](https://academic.oup.com/jid/article/223/5/811/6044063), 가구 전파 구조는 [Munywoki 등 2014](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4017365/pdf/jit828.pdf)와 [케냐 가구 모형](https://pmc.ncbi.nlm.nih.gov/articles/PMC6543068/)을 참고했다.
+- 아브리스보: MATISSE의 MA-LRTI 90일 57.1%(99.5% CI 14.7–79.8), 180일 51.3%(97.58% CI 29.4–66.8), 입원 90일 67.7%(99.17% CI 15.9–89.5), 180일 56.8%(10.1–80.7)([NEJM](https://www.nejm.org/doi/full/10.1056/NEJMoa2216480)). 접종→분만 14일 미만 효과 축소(32/82)는 [호주 예방접종 지침](https://immunisationhandbook.health.gov.au/contents/vaccine-preventable-diseases/respiratory-syncytial-virus-rsv)을 따랐다. 허가 범위는 [미국 라벨](https://labeling.pfizer.com/ShowLabeling.aspx?id=19589), [EMA](https://www.ema.europa.eu/en/documents/product-information/abrysvo-epar-product-information_en.pdf), [ACOG](https://www.acog.org/clinical-information/physician-faqs/maternal-rsv-vaccination), 국내 허가는 [연합뉴스 2026-08-14](https://www.yna.co.kr/view/AKR20260814086200017)를 참고했다.
+- 베이포투스: MELODY 주 분석 MA-LRTI 74.5%(95% CI 49.6–87.1), 입원 62.1%(−8.6–86.8)([NEJM](https://www.nejm.org/doi/full/10.1056/NEJMoa2110275)). 전체 대상 입원 76.8%는 [AstraZeneca 발표](https://www.astrazeneca.com/media-centre/press-releases/2022/nirsevimab-significantly-protected-infants-against-rsv-disease-in-phase-iii-melody-trial.html), HARMONIE 83.2%는 [Sanofi 발표](https://www.sanofi.com/en/media-room/press-releases/2023/2023-05-12-08-50-00-2667568), 반감기 71일은 [FDA 라벨](https://www.accessdata.fda.gov/drugsatfda_docs/label/2025/761328s012lbl.pdf)이다.
+- 엔플론시아: CLEVER MALRI 60.4%(95% CI 44.1–71.9), 입원 84.2%(66.6–92.6), 180일 LRI 입원 91.2%([NEJM](https://www.nejm.org/doi/full/10.1056/NEJMoa2502984)). MMWR은 LRTI 입원 90.9%로 적었다([MMWR](https://www.cdc.gov/mmwr/volumes/74/wr/mm7432a3.htm)). 반감기 44일은 [FDA 라벨](https://www.accessdata.fda.gov/drugsatfda_docs/label/2025/761432s000lbledt.pdf), 국내 허가는 [메디파나 2026-06](https://www.medipana.com/news/articleView.html?idxno=412416)를 참고했다.
+- 세 제품의 직접 비교 시험은 없다([PMC 고찰](https://pmc.ncbi.nlm.nih.gov/articles/PMC13417266/)). 예제 29의 '같은 아기에 대어 본 값'은 서로 다른 시험의 숫자를 같은 감염에 적용한 계산이며 우열의 근거가 아니다.
+- 관찰연구(예제 31): [Jabagi 등, JAMA 2026](https://pubmed.ncbi.nlm.nih.gov/41428474/)(저자 단서는 [Medscape](https://www.medscape.com/viewarticle/nirsevimab-may-top-maternal-shot-infants-rsv-prevention-2025a10010n2)), [Valtuille 등](https://www.santepubliquefrance.fr/en/node/39030), [HAS 의견](https://www.has-sante.fr/upload/docs/application/pdf/2026-07/dir8/abrysvo_femmes_enceintes_pic_reev_avisdef_ct21834.pdf).
+- 실사용 근거(예제 28)는 [NIRSE-GAL](https://www.thelancet.com/journals/laninf/article/PIIS1473-3099(24)00811-9/fulltext), 투여 시점은 [JAMA Netw Open](https://jamanetwork.com/journals/jamanetworkopen/fullarticle/2836755)과 [ACIP 경제성 자료](https://www.cdc.gov/acip/media/pdfs/2024/08/02-RSV-jones-508.pdf), 전파 감소 가정(예제 27)은 [Voirin 등](https://link.springer.com/article/10.1007/s40121-021-00566-9)을 참고했다.
+- 감염을 막는 몫, 효과 창 밖 0, 전파 감소율은 가정이다. 아기는 보호자 한 명과 밤에만 주고받으므로 아기에서 마을로 번지는 경로는 구조적으로 없다(예제 27의 0).
+
 ## 검증의 범위
 
-- `qa/core-tests.cjs`는 데이터 무결성(행 수, 해시, 통계), 같은 시드의 재현성, 보정된 a에서의 평균 2차 감염 수, 명령 규약의 오류 처리, 예제 16개의 완주를 검사한다.
+- `qa/core-tests.cjs`는 데이터 무결성(행 수, 해시, 통계), 같은 시드의 재현성, 보정된 a에서의 평균 2차 감염 수, 명령 규약의 오류 처리, 예제 32개의 완주를 검사한다.
 - 이것은 코드가 명세대로 동작하는지의 검사이지, 어떤 실제 유행을 예측하는 정확도의 검증이 아니다. 동현빌은 어떤 지역의 예측 도구도, 접종 정책 결정 도구도 아니다.
 
 ## 데이터 이용 조건

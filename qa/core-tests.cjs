@@ -70,5 +70,15 @@ check('Example outcomes tell the intended stories',()=>{
   const c90=last('measles-90').state.cum,c93=last('measles-93').state.cum;assert(c93<c90,'coverage '+c90+' vs '+c93);
   const tgt=exec(examples.find(e=>e.id==='pertussis-targeted').code);assert(tgt.state.cum<150,'targeted pertussis '+tgt.state.cum);
 });
+check('Extension examples tell the intended stories (17~32)',()=>{
+  const runs=id=>exec(examples.find(e=>e.id===id).code).state.ext.runs;
+  const p2=runs('pn-acq-outcome');assert(p2[1].pn.prevUnvac<p2[0].pn.prevUnvac&&p2[1].pn.prevUnvac<p2[2].pn.prevUnvac,'P2 blocking lowers carriage in the unvaccinated');assert(p2[2].pn.ipdVac<p2[2].pn.ipd,'P2 outcome-only');
+  const p3=runs('pn-replacement');assert(p3[1].pn.last30.VT<p3[0].pn.last30.VT&&p3[1].pn.last30.NVT>p3[0].pn.last30.NVT,'P3 replacement');
+  const r1=runs('rsv-waning');assert(r1[1].reinf===0&&r1[2].reinf>0&&r1[3].reinf>r1[2].reinf,'R1 waning');
+  const r2=runs('rsv-first')[0].rsv.groups;assert(r2[1].maRisk<r2[0].maRisk/2,'R2 first encounter');
+  for(const r of runs('rsv-indirect'))assert.strictEqual(r.rsv.fromBaby,0,'R5 structural zero');
+  const c1=runs('rsv-trials')[0].rsv.pair;assert.strictEqual(c1.map(p=>p.name).join(','),'아브리스보,베이포투스,엔플론시아');
+  for(const r of runs('rsv-observational')){const q=r.rsv.pair;assert(Math.abs(q[1].hosp[0]-62.1)<1e-9&&Math.abs(q[2].hosp[0]-84.2)<1e-9,'C3 paired values stay at trial values');}
+});
 fs.writeFileSync(path.join(__dirname,'core-results.json'),JSON.stringify({passed:count,at:new Date().toISOString()},null,1)+'\n');
 console.log('CORE TOTAL',count);
