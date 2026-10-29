@@ -21,6 +21,6 @@ check('Version 0.1 and Donghyun-lang 1.53 are consistent',()=>{
   assert(read('src/donghyun.js').includes('version: "1.53.0"'));assert(read('README.md').includes('v1.53'));
 });
 check('Counts are written as 숫자+단위, not 뉴런-style labels',()=>{for(const n of ['README.md','src/index.html','PROVENANCE.md','CREDITS.md'])assert(!/\d뉴런/.test(read(n)),n);});
-check('Series nav has four entries with 동현빌 current',()=>{const html=read('src/index.html');assert(html.includes('data-series="village" aria-current="page"'));assert((html.match(/class="series-item"/g)||[]).length===4);});
+check('Series nav has five entries with 동현빌 current',()=>{const html=read('src/index.html');assert(html.includes('data-series="village" aria-current="page"'));assert((html.match(/class="series-item"/g)||[]).length===5);});
 check('Pathogen table in SPEC matches data',()=>{const d=JSON.parse(read('data/village.json')),spec=read('SPEC.md');for(const p of d.pathogens)assert(spec.includes(String(p.a)),p.name+' a');});
 console.log('DOCUMENT TOTAL',count);
