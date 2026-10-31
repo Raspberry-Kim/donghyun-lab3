@@ -129,7 +129,7 @@ class Village{
           if(!from)for(let c=0;c<this.cands.length;c+=3)if(this.cands[c]===s){from=this.cands[c+1];}
           this.state[s]=E;this.tE[s]=now;this.infector[s]=from;this.secondary[from]++;this.generation[s]=this.generation[from]+1;this.cum++;this.newToday++;
           if(p.id===5)this.pcvAcquire(s);
-          if(ext)this.onAcquire(s,from);
+          if(ext)this.onAcquire(s,from);else if(p.sis){if(this.everInf[s])this.reinf++;this.everInf[s]=1;}
           out.events.push({from,to:s});
         }
         hz[s]=0;
