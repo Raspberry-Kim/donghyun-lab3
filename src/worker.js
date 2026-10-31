@@ -61,6 +61,8 @@ function command(op,a){
   }
 }
 /* 확장 명령 14~28 (예제 17부터). 병원체 6·7과 새 명령에서만 마을의 확장 층(village.ext)을 켠다. */
+/* 재감염이 일어날 수 있는 실행(확장 명령, 면역이 남지 않는 병원체)에서는 누적 감염이 사람 수가 아니라 감염 건수다 */
+const reinfOK=()=>!!(village.ext||village.pathogen?.sis);
 const BOX_NAMES={1:'누적 감염·재감염',2:'접종하지 않은 사람의 보균율',3:'혈청형별 보균',4:'기대 IPD',5:'아이·마을 보균율',6:'아기 배정 군',7:'세 제품을 같은 아기에',8:'관찰한 입원 비',9:'점유율 코호트'};
 const PRODUCT_NAMES={0:'보호 없음',1:'아브리스보(산모 접종)',2:'베이포투스(항체주사)',3:'엔플론시아(항체주사)'};
 const needBabyPathogen=()=>assert(village.pathogen&&(village.pathogen.id===6||village.pathogen.id===7),'아기·아이 층은 병원체 6(폐구균 풍토 보균)이나 7(RSV)에서 쓴다.');
@@ -137,13 +139,13 @@ function tick(){
 function afterDay(){
   const d=village.dayIndex(),c=village.counts(),k=village.newDays[village.newDays.length-1]||0;
   if(k>0||d%7===0)log(`${d}일째 아침 · 어제 새 감염 ${k} · 누적 ${village.cum} · 전염 중 ${c.I}`);
-  if(!world.ended&&c.E+c.I===0&&village.time>0&&!(village.imp.every>0)){world.ended=true;log(`유행 종료 · 누적 감염 ${village.cum}명 (${(village.cum/village.N*100).toFixed(1)}%) · 감수성자 ${c.S}명 남음`);}
+  if(!world.ended&&c.E+c.I===0&&village.time>0&&!(village.imp.every>0)){world.ended=true;log(reinfOK()?`유행 종료 · 누적 감염 ${village.cum}건(재감염 ${village.reinf}건 포함) · 감수성자 ${c.S}명 남음`:`유행 종료 · 누적 감염 ${village.cum}명 (${(village.cum/village.N*100).toFixed(1)}%) · 감수성자 ${c.S}명 남음`);}
 }
 function snapshot(type='frame',extra={}){
   const N=village.N,people=new Uint8Array(N);
   for(let i=1;i<=N;i++)people[i-1]=village.state[i]|(village.vaccinated[i]<<2)|(village.immune[i]<<3)|(village.isolated[i]<<4)|((village.index===i)<<5)|(village.tag[i]<<6)|(village.pcv[i]<<7);
   const c=village.counts();
-  const state={...world,time:village.time,day:village.dayIndex(),clock:village.clock(),night:village.isNight(),recordDay:village.recordDay(),counts:c,cum:village.cum,newToday:village.newToday,
+  const state={...world,time:village.time,day:village.dayIndex(),clock:village.clock(),night:village.isNight(),recordDay:village.recordDay(),counts:c,cum:village.cum,reinf:village.reinf,reinfOK:reinfOK(),newToday:village.newToday,
     pathogenName:village.pathogen?.name||'',pcv:village.pcvStats.tagged?village.pcvSummary():null,ext:extState(),index:village.index,secondaryOfIndex:village.index?village.secondary[village.index]:0,pending,running};
   const series=village.series.slice(sentSeries);sentSeries=village.series.length;
   postMessage({type,state,people,contacts:lastContacts,events:eventsBuffer,series,logs:logs.slice(-40),steps,line:vm?.currentLine||1,phys:vm&&!vm.done?(vm.stmts?.[vm.pc]?.phys||0):0,slow,seeds:seedsUsed.length?seedsUsed:[world.seed],...extArrays(),...extra});

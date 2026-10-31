@@ -92,9 +92,9 @@ function describe(s){
   const c=s.counts;
   if(!s.index&&s.time===0)return s.pathogenName+' · 바깥 유입을 기다리는 중';
   if(s.time===0)return `${s.pathogenName} · 첫 환자 ${s.index}번이 마을에 들어왔다`;
-  if(c.E+c.I===0)return `${s.pathogenName} · 유행이 끝났다 · 누적 ${s.cum}명`;
+  if(c.E+c.I===0)return `${s.pathogenName} · 유행이 끝났다 · 누적 ${s.cum}${s.reinfOK?'건':'명'}`;
   if(s.night)return `${s.pathogenName} · 밤, 기록이 없는 시간이 흐른다`;
-  return `${s.pathogenName} · 전염 중 ${c.I}명 · 잠복 ${c.E}명 · 누적 ${s.cum}명`;
+  return `${s.pathogenName} · 전염 중 ${c.I}명 · 잠복 ${c.E}명 · 누적 ${s.cum}${s.reinfOK?'건':'명'}`;
 }
 function receive(m){
   const now=performance.now();
@@ -105,7 +105,7 @@ function receive(m){
   if(m.type==='done'&&state.pcv){busy=false;status('실험 완료');const q=state.pcv;if(q.acq&&q.red20!=null)pcvHistory.push([q.red20,q.red21]);if(pcvHistory.length>10)pcvHistory.shift();
     $('#result').textContent=state.index?`${state.day}일 동안 폐구균 보균을 지켜봤다. 누적 보균 ${state.cum}명(${(state.cum/469*100).toFixed(1)}%), 65세 이상 접종자 ${q.vaccinated}명 가운데 새 보균 ${q.acq}건. 그 보균의 IPD 위험은 PCV20으로 ${q.acq?q.red20.toFixed(1):'–'}%, PCV21로 ${q.acq?q.red21.toFixed(1):'–'}% 줄었다고 셌다(차이 ${q.acq?(q.red21-q.red20).toFixed(1):'–'}%p). 가정값 위의 계산이다. 아래 설명의 한계를 함께 보자.`:'시간이 흐르지 않았다. 명령 3·7로 첫 보균자·기간을 정해 보자.';}
   else if(m.type==='done'&&state.ext){busy=false;status('실험 완료');const bs=boxSpec(state.ext);if(bs){boxHistory.push(bs.rows.map(r=>r.vals[0]?r.vals[0][0]:null));if(boxHistory.length>10)boxHistory.shift();drawBox();}$('#result').textContent=extResult(state);}
-  else if(m.type==='done'){busy=false;status('실험 완료');const c=state.counts;$('#result').textContent=state.index?`${state.day}일 동안 ${state.pathogenName} 유행을 지켜봤다. 누적 감염 ${state.cum}명(${(state.cum/469*100).toFixed(1)}%), 접종 ${c.V}명, 감수성자 ${c.S}명이 남았다.`:'시간이 흐르지 않았다. 명령 2·3·7로 병원체·첫 환자·기간을 정해 보자.';}
+  else if(m.type==='done'){busy=false;status('실험 완료');const c=state.counts;$('#result').textContent=state.index?`${state.day}일 동안 ${state.pathogenName} 유행을 지켜봤다. ${state.reinfOK?`누적 감염 ${state.cum}건(재감염 ${state.reinf}건 포함)`:`누적 감염 ${state.cum}명(${(state.cum/469*100).toFixed(1)}%)`}, 접종 ${c.V}명, 감수성자 ${c.S}명이 남았다.`:'시간이 흐르지 않았다. 명령 2·3·7로 병원체·첫 환자·기간을 정해 보자.';}
   if(m.type==='halted'){busy=false;status('중단됨');$('#result').textContent='오겡끼데스까. 실험을 멈췄다. 다시 실행하면 처음부터 시작한다.';}
   if(m.type==='error'){busy=false;status('실행 오류','error');$('#result').textContent=(m.line?m.line+'번 문장: ':'')+m.error;}
   if(state&&state.time===0&&lastDay!==0){if(series.length){archive.push(...series.map(x=>({run:runIndex,...x})));}runIndex++;series=[];chartPeak=0;sparks=[];ripples=[];contactTrails=[];}
@@ -285,7 +285,7 @@ function boxSpec(e){
   const m=e.box,runs=e.runs,C=['currentColor','#8a8170'];if(!m||!runs.length)return null;
   const tags=runTags(runs),num=k=>runs.length>1?`${k+1} · `:'';
   const runRows=(get,empty)=>runs.map((r,k)=>({label:num(k)+(tags[k]||empty),live:r.live,...get(r)}));
-  if(m===1){const P=runs.some(r=>r.pn);return {title:P?'누적 보균 획득 · 재획득':'누적 감염 · 재감염',legend:P?'● 누적 보균 획득 · □ 재획득 (건)':'● 누적 감염 · □ 재감염 (명)',rows:runRows(r=>({vals:[[r.cum,'c',C[0]],[r.reinf,'s',C[0]]],text:`${r.cum} · ${r.reinf}`}),P?'접종 없음':'기준')};}
+  if(m===1){const P=runs.some(r=>r.pn);return {title:P?'누적 보균 획득 · 재획득':'누적 감염 · 재감염',legend:P?'● 누적 보균 획득 · □ 재획득 (건)':'● 누적 감염 · □ 재감염 (건)',rows:runRows(r=>({vals:[[r.cum,'c',C[0]],[r.reinf,'s',C[0]]],text:`${r.cum} · ${r.reinf}`}),P?'접종 없음':'기준')};}
   const pn=runs.filter(r=>r.pn);
   if(m===2)return {title:'비접종자 보균율과 마을 보균율',legend:'● 비접종자 · □ 마을 전체 (%)',rows:runRows(r=>r.pn?{vals:[[r.pn.prevUnvac,'c',C[0]],[r.pn.prev,'s',C[1]]],text:`${f1(r.pn.prevUnvac)} · ${f1(r.pn.prev)}%`}:{vals:[],text:'–'},'접종 없음').map(x=>({...x,label:x.label.replace(/ \d+%(?= ·|$)/g,'')})),pct:1};
   if(m===3)return {title:'최근 30일 혈청형별 보균',legend:'<i style="color:#5f7f9e">●</i> 백신형 · <i style="color:#b5652b">●</i> 비백신형 · <i style="color:#8a4f9e">●</i> X형 (마을 %)',rows:runRows(r=>{const q=r.pn;if(!q)return {vals:[],text:'–'};const x=q.mix&&q.mix[1];return {vals:[[q.last30.VT,'c','#5f7f9e'],[q.last30.NVT,'c','#b5652b'],...(x?[[q.last30.X,'c','#8a4f9e']]:[])],text:`${f1(q.last30.VT)} · ${f1(q.last30.NVT)}${x?' · '+f1(q.last30.X):''}`};},'접종 없음'),pct:1};
