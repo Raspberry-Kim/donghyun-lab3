@@ -80,5 +80,5 @@ check('Extension examples tell the intended stories (17~32)',()=>{
   const c1=runs('rsv-trials')[0].rsv.pair;assert.strictEqual(c1.map(p=>p.name).join(','),'아브리스보,베이포투스,엔플론시아');
   for(const r of runs('rsv-observational')){const q=r.rsv.pair;assert(q[1].hosp[0]<=62.1+1e-9&&q[2].hosp[0]<=84.2+1e-9,'C3 paired values never exceed trial values');}
 });
-fs.writeFileSync(path.join(__dirname,'core-results.json'),JSON.stringify({passed:count,at:new Date().toISOString()},null,1)+'\n');
+fs.writeFileSync(path.join(__dirname,'core-results.json'),JSON.stringify({passed:count},null,1)+'\n');
 console.log('CORE TOTAL',count);
