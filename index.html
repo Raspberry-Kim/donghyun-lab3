@@ -44,6 +44,16 @@
 .ext-box{width:min(300px,36%)}.ext-box .eb-row{display:grid;grid-template-columns:1fr auto;column-gap:6px;margin-top:3px}.ext-box .eb-l{font-size:10.5px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700}.ext-box .eb-l i{font-style:normal;font-weight:400;color:var(--muted)}.ext-box .eb-t{font:10px/1.3 var(--mono);color:var(--muted);white-space:nowrap}.ext-box .eb-row svg{grid-column:1/-1;margin:0}.ext-box small i{font-style:normal}
 @media(max-width:780px){.ext-box{width:52%}.ext-box .eb-l{font-size:8.5px}.ext-box .eb-t{font-size:8px}}
 
+/* 입력 표식: 머리글 오른쪽, 켜진 아이콘만 이 실험실에서 쓸 수 있는 입력 */
+.input-marks{width:100%;grid-column:1/-1;display:flex;justify-content:center;gap:30px;margin-top:12px}
+.input-marks .mark{display:block;line-height:0}
+.input-marks svg{width:34px;height:34px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.input-marks svg .dots{stroke-width:2.2}
+.input-marks .on.kb{color:#2f3f94;filter:drop-shadow(0 0 5px rgba(47,63,148,.45))}
+.input-marks .on.ms{color:#9a7a1e;filter:drop-shadow(0 0 5px rgba(154,122,30,.5))}
+.input-marks .on.gp{color:#e0463c;filter:drop-shadow(0 0 5px rgba(224,70,60,.5))}
+.input-marks .off{color:#9a948a;opacity:.25}
+
 /* 동현랭 플레이그라운드 v1.55와 같은 색상·글꼴. 동현초·동현파와 같은 틀을 쓴다. */
 :root {
   --bg:#f4eee2;--paper:#fbf7ef;--surface2:#efe7d8;--ink:#26211c;
@@ -275,7 +285,7 @@ a.series-item:focus-visible{outline:3px solid #a5791c;outline-offset:3px}
 <!-- SERIES-NAV-END -->
   <section class="intro">
     <div><div class="eyebrow">REAL CONTACT NETWORK × ESOTERIC LANGUAGE</div><h1>마을 유행 실험실: <span class="title-brand">동현<span>빌</span><sup>TM</sup></span></h1><p>469명의 실제 접촉 기록에 <strong>동현랭</strong>으로 유행 시뮬레이션을 시도한다.</p></div>
-    <div class="model-stamp"><strong>469 <span>명</span></strong><strong>102,831 <span>거리 기록</span></strong><small>영국 Haslemere · 2017년 10월 사흘 · 5분 간격</small></div>
+    <div class="model-stamp"><strong>469 <span>명</span></strong><strong>102,831 <span>거리 기록</span></strong><small>영국 Haslemere · 2017년 10월 사흘 · 5분 간격</small><div class="input-marks" role="group" aria-label="입력 표식 · 쓸 수 있는 입력: 키보드"><span class="mark on kb" title="키보드 가능" aria-label="키보드 가능"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><path class="dots" d="M6 10h.01M9.5 10h.01M13 10h.01M16.5 10h.01M6 13h.01M9.5 13h.01M13 13h.01M16.5 13h.01"/><path d="M8 16h8"/></svg></span><span class="mark off ms" title="마우스 안 됨" aria-label="마우스 안 됨"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="3" width="10" height="18" rx="5"/><path d="M12 7v3"/></svg></span><span class="mark off gp" title="게임패드 안 됨" aria-label="게임패드 안 됨"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10a5 5 0 0 1 5 5v2.5a2.5 2.5 0 0 1-4.6 1.4L16 14H8l-1.4 1.9A2.5 2.5 0 0 1 2 14.5V12a5 5 0 0 1 5-5z"/><path d="M7 10.5v3M5.5 12h3"/><circle cx="16.5" cy="11" r=".7"/><circle cx="18.6" cy="13" r=".7"/></svg></span></div></div>
   </section>
   <nav class="tabs" aria-label="실험실 메뉴"><button class="active" data-tab="lab" aria-current="page">실험실</button><button data-tab="protocol">동현랭 조작 규약</button><button data-tab="science">모델과 출처</button><span>조작은 오직 동현랭으로</span></nav>
   <div class="getting-started"><p><strong>처음이라면?</strong> 예제를 고르고 <b>실행</b>을 눌러 보자. 병원체·첫 환자·접종·격리는 모두 동현랭 명령으로만 정한다.</p><a href="https://raspberry-kim.github.io/donghyun-lang/" target="_blank" rel="noopener">동현랭 배우기 · 실행기 ↗</a></div>
@@ -340,7 +350,7 @@ a.series-item:focus-visible{outline:3px solid #a5791c;outline-offset:3px}
       <tr><td>11</td><td>재생 속도</td><td>1 느리게 / 2 보통 / 3 빠르게 · 계산 결과는 같다</td></tr>
     </tbody></table></div>
     <div class="doc-columns"><div><h3>순서와 규칙</h3><p>병원체(2)를 고른 뒤 접종(4·5)과 첫 환자(3)를 정하고 시간(7)을 진행한다. 병원체와 첫 환자는 시간이 흐르기 전에만 바꿀 수 있고, 접종·백신 효과·격리 정책은 유행 도중에도 바꿀 수 있다. 초기화(1)는 모든 것을 지우고 새 마을에서 시작하므로, 한 프로그램에서 여러 조건을 이어서 비교할 수 있다.</p><p>접종은 아직 감염되지 않은 사람에게만 적용되며, 백신 효과(%)의 확률로 완전한 면역이 생기고 나머지는 접종을 받았어도 감수성자로 남는다. 접종 즉시 효과가 생기는 단순화다.</p></div><div><h3>읽고 다시 개입하기</h3><p>관측 항목: 1 경과 일수, 2 감수성자, 3 잠복기, 4 전염 중, 5 회복, 6 접종자, 7 누적 감염, 8 격리 중, 9 최근 하루 새 감염, 10 첫 환자가 직접 감염시킨 수.</p><p>모든 값은 사람 수 정수다. 문장 끝은 <code>~</code>, 정수 출력은 <code>뿡뿡</code>, 줄바꿈은 <code>뿡뿡뿡</code>이다. 예제 09는 관측값을 조건문에 넣어 뒤늦은 접종을 결정하고, 예제 11은 반복문으로 하루씩 읽어 기록한다.</p></div></div>
-    <h3>실험의 경계</h3><p>한 프로그램의 모의 기간은 365일, 코드 길이는 100,000자, 실행은 30만 문장까지다. 각 실행은 새 실험이다. 예제 선택·코드 편집·파일 저장·문서 읽기·화면 전환은 마을을 조작하지 않는다. 중단 버튼도 고정된 동현랭 <code>오겡끼데스까</code> 프로그램을 실행한다.</p>
+    <h3>실험의 경계</h3><p>머리글 오른쪽의 세 아이콘(키보드·마우스·게임패드)은 입력 표식이다. 켜진 것만 이 실험실에서 쓸 수 있다: <b>키보드</b>.</p><p>한 프로그램의 모의 기간은 365일, 코드 길이는 100,000자, 실행은 30만 문장까지다. 각 실행은 새 실험이다. 예제 선택·코드 편집·파일 저장·문서 읽기·화면 전환은 마을을 조작하지 않는다. 중단 버튼도 고정된 동현랭 <code>오겡끼데스까</code> 프로그램을 실행한다.</p>
     <p>전문과 범위는 배포 묶음의 <code>SPEC.md</code>에 있다. 원래 동현랭 문법은 <a href="https://raspberry-kim.github.io/donghyun-lang/" target="_blank" rel="noopener">동현랭 플레이그라운드</a>에서 배울 수 있다.</p>
   </section>
   <section id="tab-science" class="tab-panel document" hidden>
