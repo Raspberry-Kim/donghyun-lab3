@@ -89,6 +89,6 @@ references:
         given-names: Dong Hyun
         orcid: "https://orcid.org/0000-0001-9883-0229"
         affiliation: "Inha University College of Medicine"
-    version: "1.53"
+    version: "1.54"
     license: MIT
     repository-code: "https://github.com/Raspberry-Kim/donghyun-lang"
