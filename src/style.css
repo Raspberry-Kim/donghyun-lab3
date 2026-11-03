@@ -34,13 +34,19 @@
 .chart-legend #ext-legend{display:contents}.chart-legend #ext-legend:before{display:none}
 .ext-box{width:min(300px,36%)}.ext-box .eb-row{display:grid;grid-template-columns:1fr auto;column-gap:6px;margin-top:3px}.ext-box .eb-l{font-size:10.5px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700}.ext-box .eb-l i{font-style:normal;font-weight:400;color:var(--muted)}.ext-box .eb-t{font:10px/1.3 var(--mono);color:var(--muted);white-space:nowrap}.ext-box .eb-row svg{grid-column:1/-1;margin:0}.ext-box small i{font-style:normal}
 @media(max-width:780px){.ext-box{width:52%}.ext-box .eb-l{font-size:8.5px}.ext-box .eb-t{font-size:8px}}
-
-/* 입력 표식: 머리글 오른쪽, 켜진 아이콘만 이 실험실에서 쓸 수 있는 입력 */
-.input-marks{width:100%;grid-column:1/-1;display:flex;justify-content:center;gap:30px;margin-top:12px}
-.input-marks .mark{display:block;line-height:0}
-.input-marks svg{width:34px;height:34px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+/* 입력 표식: 머리글 오른쪽에 붙여 정렬, 켜진 아이콘만 이 실험실에서 쓸 수 있는 입력. 네 번째는 전체 화면 */
+.input-marks{width:100%;grid-column:1/-1;display:flex;justify-content:flex-end;gap:30px;margin-top:12px}
+.input-marks .mark{display:block;line-height:0;cursor:help;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.input-marks svg{width:41px;height:41px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 .input-marks svg .dots{stroke-width:2.2}
+.input-marks svg .full{fill:currentColor;stroke:none;font:800 6.6px/1 var(--body,sans-serif);letter-spacing:.2px}
 .input-marks .on.kb{color:#2f3f94;filter:drop-shadow(0 0 5px rgba(47,63,148,.45))}
 .input-marks .on.ms{color:#9a7a1e;filter:drop-shadow(0 0 5px rgba(154,122,30,.5))}
 .input-marks .on.gp{color:#e0463c;filter:drop-shadow(0 0 5px rgba(224,70,60,.5))}
+.input-marks .on.fs{color:#2f8a5a;filter:drop-shadow(0 0 5px rgba(47,138,90,.5))}
 .input-marks .off{color:#9a948a;opacity:.25}
+/* 표식 풍선 도움말: 마우스를 올리면 뜨고 치우면 사라진다. 손으로 대면 뜨고 뗀 뒤 3초 후 사라진다 */
+.mark-tip{position:fixed;z-index:3000;max-width:min(280px,calc(100vw - 24px));padding:8px 12px;border-radius:9px;background:#1f1c18;color:#f6f1e8;font:500 12.5px/1.55 var(--body,sans-serif);box-shadow:0 6px 20px rgba(0,0,0,.22);pointer-events:none;opacity:0;transition:opacity .15s;word-break:keep-all}
+.mark-tip.show{opacity:1}.mark-tip b{color:#f2b705;font-weight:700}
+.mark-tip::before{content:"";position:absolute;top:-6px;left:var(--ax,50%);width:12px;height:12px;background:#1f1c18;transform:translateX(-50%) rotate(45deg);border-radius:2px}
+@media(max-width:780px){.intro{flex-wrap:wrap}.model-stamp{display:flex!important;justify-content:flex-end;margin-top:0;width:100%;flex:0 0 100%}.model-stamp>:not(.input-marks){display:none}.input-marks{margin-top:0;gap:22px}.input-marks svg{width:36px;height:36px}}
