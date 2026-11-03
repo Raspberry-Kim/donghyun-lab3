@@ -2,7 +2,7 @@ cff-version: 1.2.0
 message: "If you use this software, please cite it using the metadata below."
 title: "Donghyunvil (동현빌): an educational village-outbreak laboratory on a real contact network, controlled through the esoteric language Donghyun-lang"
 type: software
-version: "0.71"
+version: "0.72"
 date-released: "2026-11-03"
 doi: "10.5281/zenodo.23689490"
 authors:
@@ -89,6 +89,6 @@ references:
         given-names: Dong Hyun
         orcid: "https://orcid.org/0000-0001-9883-0229"
         affiliation: "Inha University College of Medicine"
-    version: "1.54"
+    version: "1.55"
     license: MIT
     repository-code: "https://github.com/Raspberry-Kim/donghyun-lang"
