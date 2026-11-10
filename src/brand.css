@@ -123,9 +123,11 @@ th{background:var(--surface2)}
 .series-context{margin:0;flex:0 1 170px;min-width:0;font-size:12px;line-height:1.65;color:var(--series-muted)}
 .series-context strong{display:block;font-size:13px;letter-spacing:-.02em;font-weight:650;color:var(--series-ink)}
 .series-links{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:5px;flex:1;min-width:0} /* 데스크톱: 두 줄, 반씩. 항목 수에 따라 열 수를 정하고 홀수면 동현랭이 두 칸(휴대폰 규칙과 같다) */
-.series-links:has(.series-item:nth-child(13):last-child),.series-links:has(.series-item:nth-child(14):last-child){grid-template-columns:repeat(7,minmax(0,1fr))}
-.series-links:has(.series-item:nth-child(17):last-child),.series-links:has(.series-item:nth-child(18):last-child){grid-template-columns:repeat(9,minmax(0,1fr))}
-.series-links:has(.series-item:nth-child(19):last-child),.series-links:has(.series-item:nth-child(20):last-child){grid-template-columns:repeat(10,minmax(0,1fr))}
+@media(min-width:781px){ /* 휴대폰(780px 이하)은 두 열 규칙을 따른다. 지금 여기 칸은 글이 길어 제 폭만큼은 지킨다 */
+.series-links:has(.series-item:nth-child(13):last-child),.series-links:has(.series-item:nth-child(14):last-child){grid-template-columns:repeat(7,minmax(min-content,1fr))}
+.series-links:has(.series-item:nth-child(17):last-child),.series-links:has(.series-item:nth-child(18):last-child){grid-template-columns:repeat(9,minmax(min-content,1fr))}
+.series-links:has(.series-item:nth-child(19):last-child),.series-links:has(.series-item:nth-child(20):last-child){grid-template-columns:repeat(10,minmax(min-content,1fr))}
+}
 .series-links:has(.series-item:nth-child(odd):last-child) .series-item[data-series="lang"]{grid-column:span 2}
 .series-item{display:flex;flex-direction:column;justify-content:center;gap:3px;min-height:54px;padding:8px 5px;border:1px solid var(--series-line);border-radius:10px;background:var(--series-paper);color:var(--series-ink);text-decoration:none;transition:background .15s,border-color .15s,transform .15s}
 a.series-item:hover{background:#fff0c6;border-color:#b99542;transform:translateY(-1px);color:#42372d}
@@ -139,7 +141,7 @@ a.series-item:focus-visible{outline:3px solid #a5791c;outline-offset:3px}
 .series-item[aria-current="page"] .series-note:after{content:' · 지금 여기';font-size:10px}
 [data-theme="dark"] .series-strip{--series-ink:#eee4d3;--series-muted:#b2a38e;--series-line:#4e4436;--series-paper:#24201b}
 [data-theme="dark"] a.series-item:hover{background:#352d1f;color:#f7ecd8;border-color:#8c7338}
-@media(max-width:1180px){.series-strip{flex-wrap:wrap}.series-context{flex-basis:100%}.series-links{grid-template-columns:repeat(auto-fill,minmax(104px,1fr))}.series-links .series-item[data-series="lang"]{grid-column:auto}}
+@media(max-width:1180px){.series-strip{flex-wrap:wrap}.series-context{flex-basis:100%}.series-links{flex-basis:100%;gap:4px}.series-item{padding:8px 4px}} /* 781~1180px: 설명은 윗줄로, 칸은 좌우 간격을 줄여 데스크톱과 같은 두 줄 */
 @media(max-width:780px){
  .series-strip{display:block;padding:14px 0 16px;margin-bottom:20px}
  .series-context{margin-bottom:10px;font-size:11px}.series-context strong{display:inline;margin-right:8px;font-size:11px}
