@@ -17,7 +17,7 @@ check('Source repository, commit and data download are discoverable',()=>{
 check('Data license status is stated honestly',()=>{for(const n of ['CREDITS.md','PROVENANCE.md','README.md']){const t=read(n);assert(t.includes('GPL-3')&&/적지 않았|적혀 있지 않/.test(t),n);}});
 check('Only code-driven simulation controls',()=>{const html=read('src/index.html');assert(!/type="range"/.test(html));assert(!/onpointerdown|onmousedown|ontouchstart/.test(html));assert(html.includes('조작은 오직 동현랭으로'));});
 check('Version 0.1 and Donghyun-lang 1.55 are consistent',()=>{
-  assert(require('../package.json').version==='0.75.0');assert(read('src/index.html').includes('v0.75'));assert(read('SPEC.md').includes('v0.75'));assert(read('CHANGELOG.md').includes('## v0.75'));
+  assert(require('../package.json').version==='0.76.0');assert(read('src/index.html').includes('v0.76'));assert(read('SPEC.md').includes('v0.76'));assert(read('CHANGELOG.md').includes('## v0.76'));
   assert(read('src/donghyun.js').includes('version: "1.55.0"'));assert(read('README.md').includes("v1.55"));
 });
 check('Counts are written as 숫자+단위, not 뉴런-style labels',()=>{for(const n of ['README.md','src/index.html','PROVENANCE.md','CREDITS.md'])assert(!/\d뉴런/.test(read(n)),n);});
