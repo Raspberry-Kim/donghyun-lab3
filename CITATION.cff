@@ -2,8 +2,8 @@ cff-version: 1.2.0
 message: "If you use this software, please cite it using the metadata below."
 title: "Donghyunvil (동현빌): an educational village-outbreak laboratory on a real contact network, controlled through the esoteric language Donghyun-lang"
 type: software
-version: "0.78"
-date-released: "2026-11-14"
+version: "0.79"
+date-released: "2026-11-16"
 doi: "10.5281/zenodo.23689490"
 authors:
   - family-names: Kim
@@ -14,6 +14,9 @@ license: MIT
 repository-code: "https://github.com/Raspberry-Kim/donghyun-lab3"
 url: "https://raspberry-kim.github.io/donghyun-lab3/"
 abstract: >-
+  Version 0.79 adds a fullscreen presentation that shows the experiment and
+  graph together, with the original code execution controls at the bottom.
+  The simulation model, data and language semantics are unchanged.
   Donghyunvil is a browser-based, noncommercial educational laboratory for
   exploring infectious disease transmission, vaccination and isolation
   policies. It simulates hypothetical outbreaks of measles, pertussis and

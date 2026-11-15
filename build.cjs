@@ -6,9 +6,9 @@ fs.mkdirSync(out,{recursive:true});
 for(const file of fs.readdirSync(out))if(/^(worker\.bundle|app|village|style)\.[a-f0-9]{12}\.(js|json|css)$/.test(file))fs.unlinkSync(path.join(out,file));
 const hashed=(stem,ext,text)=>{const name=stem+'.'+crypto.createHash('sha256').update(text).digest('hex').slice(0,12)+'.'+ext;fs.writeFileSync(path.join(out,name),text);return name;};
 const worker=[src('donghyun.js'),src('village.js'),src('examples.js'),src('worker.js')].join('\n');
-const app=[src('examples.js'),src('app.js')].join('\n');
+const app=[src('examples.js'),src('app.js'),src('fullscreen.js')].join('\n');
 const data=fs.readFileSync(path.join(root,'data/village.json'),'utf8');
-const css=src('style.css')+'\n'+src('brand.css');
+const css=src('style.css')+'\n'+src('brand.css')+'\n'+src('fullscreen.css');
 const workerFile=hashed('worker.bundle','js',worker),appFile=hashed('app','js',app),dataFile=hashed('village','json',data),cssFile=hashed('style','css',css);
 fs.copyFileSync(path.join(root,'LICENSE'),path.join(root,'licenses/DONGHYUNVIL-LICENSE.txt'));
 let html=integrateReferenceDocuments(src('index.html'),root)
