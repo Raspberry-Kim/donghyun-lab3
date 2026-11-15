@@ -346,7 +346,7 @@ function drawChart(){
   const src=allSeries.length?allSeries:series;
   for(const s of src)chartPeak=Math.max(chartPeak,s.E+s.I,s.R,s.VI,s.virus||0);
   const ymax=niceMax(Math.max(10,chartPeak*1.1));chart.dataset.yMax=String(ymax);
-  const w=chart.getBoundingClientRect().width;if(w<1)return;const h=w<500?300:360,d=Math.min(devicePixelRatio||1,2);chart.width=Math.round(w*d);chart.height=Math.round(h*d);chart.style.height=h+'px';cc.setTransform(d,0,0,d,0,0);
+  const box=chart.getBoundingClientRect(),w=box.width;if(w<1)return;const h=document.body.classList.contains('dh-presenting')?box.height:w<500?300:360,d=Math.min(devicePixelRatio||1,2);chart.width=Math.round(w*d);chart.height=Math.round(h*d);chart.style.height=h+'px';cc.setTransform(d,0,0,d,0,0);
   const p=theme(),dark=document.documentElement.dataset.theme==='dark',left=46,right=w-16,top=20,bottom=h-34;cc.clearRect(0,0,w,h);cc.fillStyle=dark?'#201d18':'#fbf7ef';cc.fillRect(0,0,w,h);cc.font='11px "Nanum Gothic Coding"';cc.textAlign='right';
   for(let i=0;i<=4;i++){const y=ymax*i/4,yy=bottom-y/ymax*(bottom-top);cc.strokeStyle=dark?'#c4b18b22':'#dacfb666';cc.lineWidth=1;cc.beginPath();cc.moveTo(left,yy);cc.lineTo(right,yy);cc.stroke();cc.fillStyle=dark?'#bdb19c':'#6e6356';cc.fillText(Math.round(y)+'',left-8,yy+4);}
   const lastT=src.length?src[src.length-1].t:0,span=Math.max(3,Math.ceil(Math.max(lastT,(state?.pending||0)/288+lastT)));
@@ -366,7 +366,7 @@ function drawChart(){
   cc.restore();
   $('#chart-scale').textContent=`Y축 0–${ymax}명 · 자동 범위 · X축 ${span}일 · 한 시간 간격 표본`;
 }
-window.render_game_to_text=()=>JSON.stringify({app:'동현빌',version:'0.70',busy,state:state?{day:state.day,clock:state.clock,night:state.night,counts:state.counts,cum:state.cum,pathogen:state.pathogenName,index:state.index}:null,coordinates:'960×720, x right, y down; sky strip 44px at top; 469 villagers at fixed positions'});
+window.render_game_to_text=()=>JSON.stringify({app:'동현빌',version:'0.79',busy,state:state?{day:state.day,clock:state.clock,night:state.night,counts:state.counts,cum:state.cum,pathogen:state.pathogenName,index:state.index}:null,coordinates:'960×720, x right, y down; sky strip 44px at top; 469 villagers at fixed positions'});
 let ticking=false;function animate(){if(ticking)return;ticking=true;const frame=()=>{draw();if(busy&&!reduced)requestAnimationFrame(frame);else{ticking=false;draw();drawChart();}};requestAnimationFrame(frame);}
 let chartTimer=0;const chartLoop=()=>{if(busy)drawChart();if(busy)chartTimer=setTimeout(chartLoop,500);};
 new ResizeObserver(()=>{draw();drawChart();}).observe($('.observation'));document.fonts.ready.then(()=>{draw();drawChart();});
