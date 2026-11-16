@@ -2,7 +2,7 @@ cff-version: 1.2.0
 message: "If you use this software, please cite it using the metadata below."
 title: "Donghyunvil (동현빌): an educational village-outbreak laboratory on a real contact network, controlled through the esoteric language Donghyun-lang"
 type: software
-version: "0.80"
+version: "0.81"
 date-released: "2026-11-16"
 doi: "10.5281/zenodo.23689490"
 authors:
@@ -14,10 +14,11 @@ license: MIT
 repository-code: "https://github.com/Raspberry-Kim/donghyun-lab3"
 url: "https://raspberry-kim.github.io/donghyun-lab3/"
 abstract: >-
-  Version 0.80 adds live fullscreen readouts and complete example descriptions.
-  Fullscreen starts light; its moon button darkens only empty background space,
-  keeping the experiment, tables, graph, text panels and execution controls light.
-  The playground theme behavior is unchanged and restored on exit.
+  Version 0.81 uses the ordinary playground light/dark theme in fullscreen,
+  replacing the empty-background-only mode. Each fullscreen entry starts light;
+  the moon button switches the complete theme through the existing handler,
+  and exiting restores the previous playground theme. Live readouts and complete
+  example descriptions remain available.
   The simulation model, data and language semantics are unchanged.
   Donghyunvil is a browser-based, noncommercial educational laboratory for
   exploring infectious disease transmission, vaccination and isolation

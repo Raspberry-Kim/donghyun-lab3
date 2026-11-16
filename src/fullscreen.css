@@ -5,8 +5,7 @@ body.dh-presenting{overflow:hidden}
 body.dh-presenting>main,body.dh-presenting>header,body.dh-presenting>footer{visibility:hidden}
 .dh-fullscreen{position:fixed;inset:0;z-index:10000;box-sizing:border-box;width:100%;height:100dvh;max-width:none;background:var(--paper,#faf7ef);color:var(--ink,#29251f);padding:16px 24px max(12px,env(safe-area-inset-bottom));display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:12px;overflow:auto}
 .dh-fullscreen:fullscreen{width:100%;height:100dvh}
-/* Only unused presentation space changes tone; all content keeps its light palette. */
-.dh-fullscreen[data-backdrop=dark]{background:#191613}
+/* All presentation surfaces inherit the ordinary light/dark theme. */
 .dh-full-state,.dh-full-actions,.dh-fullscreen .legend,.dh-full-caption,
 .dh-full-meters,.dh-full-plot,.dh-full-graph>.section-bar,.dh-full-graph>.chart-title,
 .dh-full-graph>.chart-legend,.dh-full-controls{background:var(--paper);color:var(--ink);border-radius:6px}
