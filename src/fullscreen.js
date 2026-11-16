@@ -25,10 +25,27 @@
   const buttons=['run','slow','repeat10','halt'].map(id=>document.getElementById(id));
   const moves=[],background=[];
   let active=false,hadNative=false,serial=0,scrollYBefore=0,focusBefore=null,themeBefore='light';
+  let settingTheme=false,themeAttributes=[];
   function setTheme(value){
-    if(document.documentElement.dataset.theme!==value)themeButton?.click();
+    settingTheme=true;
+    try{if(document.documentElement.dataset.theme!==value)themeButton?.click();}
+    finally{settingTheme=false;}
     themeButton?.setAttribute('aria-pressed',String(value==='dark'));
   }
+  function setBackdrop(dark){
+    overlay.dataset.backdrop=dark?'dark':'light';
+    themeButton?.setAttribute('aria-pressed',String(dark));
+    const label=dark?'전체화면 빈 배경을 밝게':'전체화면 빈 배경만 어둡게';
+    themeButton?.setAttribute('aria-label',label);
+    themeButton?.setAttribute('title',label);
+  }
+  // The original playground handler remains untouched. In presentation only,
+  // intercept the same moon button and change the empty backdrop, not the content.
+  themeButton?.addEventListener('click',event=>{
+    if(!active||settingTheme)return;
+    event.stopImmediatePropagation();
+    setBackdrop(overlay.dataset.backdrop!=='dark');
+  },true);
   function syncCaption(){
     const selected=exampleSelect?.selectedOptions[0];
     const code=document.getElementById('code').value;
@@ -64,6 +81,9 @@
     if(!active)return;
     active=false;serial++;
     setTheme(themeBefore);
+    for(const [name,value] of themeAttributes){
+      if(value===null)themeButton?.removeAttribute(name);else themeButton?.setAttribute(name,value);
+    }
     for(const [node,marker] of moves.splice(0)){marker.replaceWith(node);}
     if(oldArenaStyle===null)arena.removeAttribute('style');else arena.setAttribute('style',oldArenaStyle);
     for(const [node,inert] of background.splice(0))node.inert=inert;
@@ -85,6 +105,7 @@
     active=true;hadNative=false;const ticket=++serial;
     scrollYBefore=window.scrollY;focusBefore=document.activeElement;
     themeBefore=document.documentElement.dataset.theme||'light';
+    themeAttributes=['aria-label','title','aria-pressed'].map(name=>[name,themeButton?.getAttribute(name)??null]);
     overlay.hidden=false;document.body.classList.add('dh-presenting');
     entry.setAttribute('aria-expanded','true');
     move(arena,arenaHost);move(sceneLegend,scene,caption);
@@ -93,7 +114,7 @@
     move(note,caption);move(document.getElementById('result'),caption);
     move(document.getElementById('ext-panel'),caption);
     move(themeButton,overlay.querySelector('.dh-full-actions'),exit);
-    syncCaption();setTheme('dark');
+    syncCaption();setTheme('light');setBackdrop(false);
     move(document.getElementById('status'),overlay.querySelector('.dh-full-state'));
     buttons.forEach(button=>move(button,controls));
     for(const node of document.body.children)if(node!==overlay&&!['SCRIPT','STYLE'].includes(node.tagName)){
