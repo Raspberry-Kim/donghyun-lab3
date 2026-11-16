@@ -25,27 +25,12 @@
   const buttons=['run','slow','repeat10','halt'].map(id=>document.getElementById(id));
   const moves=[],background=[];
   let active=false,hadNative=false,serial=0,scrollYBefore=0,focusBefore=null,themeBefore='light';
-  let settingTheme=false,themeAttributes=[];
+  let themeAttributes=[];
   function setTheme(value){
-    settingTheme=true;
-    try{if(document.documentElement.dataset.theme!==value)themeButton?.click();}
-    finally{settingTheme=false;}
+    // Use the original playground handler, including canvas redraws.
+    if((document.documentElement.dataset.theme||'light')!==value)themeButton?.click();
     themeButton?.setAttribute('aria-pressed',String(value==='dark'));
   }
-  function setBackdrop(dark){
-    overlay.dataset.backdrop=dark?'dark':'light';
-    themeButton?.setAttribute('aria-pressed',String(dark));
-    const label=dark?'전체화면 빈 배경을 밝게':'전체화면 빈 배경만 어둡게';
-    themeButton?.setAttribute('aria-label',label);
-    themeButton?.setAttribute('title',label);
-  }
-  // The original playground handler remains untouched. In presentation only,
-  // intercept the same moon button and change the empty backdrop, not the content.
-  themeButton?.addEventListener('click',event=>{
-    if(!active||settingTheme)return;
-    event.stopImmediatePropagation();
-    setBackdrop(overlay.dataset.backdrop!=='dark');
-  },true);
   function syncCaption(){
     const selected=exampleSelect?.selectedOptions[0];
     const code=document.getElementById('code').value;
@@ -114,7 +99,7 @@
     move(note,caption);move(document.getElementById('result'),caption);
     move(document.getElementById('ext-panel'),caption);
     move(themeButton,overlay.querySelector('.dh-full-actions'),exit);
-    syncCaption();setTheme('light');setBackdrop(false);
+    syncCaption();setTheme('light');
     move(document.getElementById('status'),overlay.querySelector('.dh-full-state'));
     buttons.forEach(button=>move(button,controls));
     for(const node of document.body.children)if(node!==overlay&&!['SCRIPT','STYLE'].includes(node.tagName)){
