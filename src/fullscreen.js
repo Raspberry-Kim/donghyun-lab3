@@ -12,16 +12,33 @@
   overlay.id='dh-fullscreen';overlay.className='dh-fullscreen';overlay.hidden=true;
   overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');
   overlay.setAttribute('aria-label','실험 전체화면');
-  overlay.innerHTML='<div class="dh-full-top"><div class="dh-full-state"></div><button type="button" class="dh-btn" id="full-exit" aria-label="전체화면 종료">전체화면 종료 <kbd>Esc</kbd></button></div><div class="dh-full-visuals"><div class="dh-full-scene"><div class="dh-full-arena"></div></div><div class="dh-full-graph"><div class="dh-full-plot"></div></div></div><div class="dh-full-controls" role="group" aria-label="코드 실행 조작"></div>';
+  overlay.innerHTML='<div class="dh-full-top"><div class="dh-full-state"></div><div class="dh-full-actions"><button type="button" class="dh-btn" id="full-exit" aria-label="전체화면 종료">전체화면 종료 <kbd>Esc</kbd></button></div></div><div class="dh-full-visuals"><div class="dh-full-scene"><div class="dh-full-arena"></div><section class="dh-full-caption" tabindex="0" aria-label="현재 예제와 설명"><h2 class="dh-full-example"></h2></section></div><div class="dh-full-graph"><div class="dh-full-meters"></div><div class="dh-full-plot"></div></div></div><div class="dh-full-controls" role="group" aria-label="코드 실행 조작"></div>';
   document.body.append(overlay);
   const exit=overlay.querySelector('#full-exit'),controls=overlay.querySelector('.dh-full-controls');
   const arenaHost=overlay.querySelector('.dh-full-arena'),scene=overlay.querySelector('.dh-full-scene');
   const graph=overlay.querySelector('.dh-full-graph'),plot=overlay.querySelector('.dh-full-plot');
+  const caption=overlay.querySelector('.dh-full-caption'),exampleTitle=overlay.querySelector('.dh-full-example');
+  const themeButton=document.getElementById('theme'),exampleSelect=document.getElementById('example');
+  const meters=observation.querySelector('.readouts,.meters'),note=document.getElementById('example-note');
   const title=document.querySelector('.signal-panel .section-bar,.chart-title');
   const legend=document.querySelector('.chart-legend'),sceneLegend=observation.querySelector('.legend');
   const buttons=['run','slow','repeat10','halt'].map(id=>document.getElementById(id));
   const moves=[],background=[];
-  let active=false,hadNative=false,serial=0,scrollYBefore=0,focusBefore=null;
+  let active=false,hadNative=false,serial=0,scrollYBefore=0,focusBefore=null,themeBefore='light';
+  function setTheme(value){
+    if(document.documentElement.dataset.theme!==value)themeButton?.click();
+    themeButton?.setAttribute('aria-pressed',String(value==='dark'));
+  }
+  function syncCaption(){
+    const selected=exampleSelect?.selectedOptions[0];
+    const code=document.getElementById('code').value;
+    const original=typeof examples!=='undefined'?examples.find(e=>e.id===exampleSelect.value):null;
+    const normalized=value=>value.split(/\r?\n/).map(line=>line.trim()).join('\n').trim();
+    const same=original&&normalized(code)===normalized(original.code);
+    exampleTitle.textContent=same?selected.textContent:'직접 작성·편집한 코드'+(selected?' · 참고 예제: '+selected.textContent:'');
+    // Keep the original note and its qualifications intact, also for imported files.
+    caption.scrollTop=0;
+  }
   const focusBack=()=>{if(!active&&focusBefore?.isConnected)focusBefore.focus({preventScroll:true});};
   function move(node,destination,before=null){
     if(!node)return;
@@ -46,6 +63,7 @@
   function restore(){
     if(!active)return;
     active=false;serial++;
+    setTheme(themeBefore);
     for(const [node,marker] of moves.splice(0)){marker.replaceWith(node);}
     if(oldArenaStyle===null)arena.removeAttribute('style');else arena.setAttribute('style',oldArenaStyle);
     for(const [node,inert] of background.splice(0))node.inert=inert;
@@ -66,10 +84,16 @@
     if(active)return;
     active=true;hadNative=false;const ticket=++serial;
     scrollYBefore=window.scrollY;focusBefore=document.activeElement;
+    themeBefore=document.documentElement.dataset.theme||'light';
     overlay.hidden=false;document.body.classList.add('dh-presenting');
     entry.setAttribute('aria-expanded','true');
-    move(arena,arenaHost);move(sceneLegend,scene);
+    move(arena,arenaHost);move(sceneLegend,scene,caption);
+    move(meters,overlay.querySelector('.dh-full-meters'));
     move(title,graph,plot);move(chart,plot);move(legend,graph);
+    move(note,caption);move(document.getElementById('result'),caption);
+    move(document.getElementById('ext-panel'),caption);
+    move(themeButton,overlay.querySelector('.dh-full-actions'),exit);
+    syncCaption();setTheme('dark');
     move(document.getElementById('status'),overlay.querySelector('.dh-full-state'));
     buttons.forEach(button=>move(button,controls));
     for(const node of document.body.children)if(node!==overlay&&!['SCRIPT','STYLE'].includes(node.tagName)){
@@ -86,6 +110,7 @@
     }
   }
   entry.addEventListener('click',open);exit.addEventListener('click',close);
+  exampleSelect?.addEventListener('change',()=>{if(active)syncCaption();});
   document.addEventListener('fullscreenchange',()=>{
     if(document.fullscreenElement===overlay){hadNative=true;fit();}
     else if(active&&hadNative){restore();requestAnimationFrame(focusBack);}
