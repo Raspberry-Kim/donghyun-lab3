@@ -18,6 +18,7 @@
   const arenaHost=overlay.querySelector('.dh-full-arena'),scene=overlay.querySelector('.dh-full-scene');
   const graph=overlay.querySelector('.dh-full-graph'),plot=overlay.querySelector('.dh-full-plot');
   const caption=overlay.querySelector('.dh-full-caption'),exampleTitle=overlay.querySelector('.dh-full-example');
+  const visuals=overlay.querySelector('.dh-full-visuals');
   const themeButton=document.getElementById('theme'),exampleSelect=document.getElementById('example');
   const meters=observation.querySelector('.readouts,.meters'),note=document.getElementById('example-note');
   const title=document.querySelector('.signal-panel .section-bar,.chart-title');
@@ -50,7 +51,11 @@
   function fit(){
     if(!active)return;
     const ratio=Number(arena.dataset.fullRatio);
-    const width=Math.max(1,Math.min(arenaHost.clientWidth,arenaHost.clientHeight*ratio));
+    // Phones: the scene takes the column width and the rest scrolls below it, so the
+    // height limit is the visible scroll area, not what the other parts leave over.
+    const mode=getComputedStyle(overlay).getPropertyValue('--dh-full-fit').trim();
+    const limit=mode==='visuals'?visuals:mode==='scene'?scene:arenaHost;
+    const width=Math.max(1,Math.min(arenaHost.clientWidth,limit.clientHeight*ratio));
     arena.style.width=width+'px';arena.style.height=width/ratio+'px';
     // Let the original renderers recalculate axes and their device-pixel backing store.
     window.dispatchEvent(new Event('resize'));
@@ -136,5 +141,5 @@
   // Avoid browser gesture zoom within presentation. No simulation parameters are changed.
   overlay.addEventListener('wheel',e=>{if(e.ctrlKey)e.preventDefault();},{passive:false});
   for(const event of ['gesturestart','gesturechange','gestureend'])overlay.addEventListener(event,e=>e.preventDefault(),{passive:false});
-  new ResizeObserver(fit).observe(arenaHost);
+  const sizes=new ResizeObserver(fit);for(const node of [arenaHost,visuals,scene])sizes.observe(node);
 })();

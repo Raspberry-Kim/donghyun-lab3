@@ -1,7 +1,7 @@
 const $=s=>document.querySelector(s),canvas=$('#arena'),ctx=canvas.getContext('2d'),chart=$('#chart'),cc=chart.getContext('2d');
 const W=960,H=720,SKY=60;
 let worker,ready=false,busy=false,state=null,people=null,series=[],allSeries=[],lastSource='',data=null,workerURL='',chartPeak=0,layout=null,paths=[],meadows=[],bg=null,bgKey='';
-let contactTrails=[],sparks=[],ripples=[],lastDay=-1,archive=[],runIndex=0,extArr={};
+let contactTrails=[],sparks=[],ripples=[],lastDay=-1,archive=[],runIndex=0,extArr={},lastDraw=0;
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const S=0,E=1,I=2,R=3;
 const palette={
@@ -123,7 +123,7 @@ function receive(m){
   $('#clock').textContent=(state?`${state.day}일째 ${state.clock}`:'0일째 07:00');$('#clock-note').textContent=state?.index?(state.night?`${DAYNAMES[state.recordDay]}요일 기록 · 밤, 접촉 기록 없음`:`${DAYNAMES[state.recordDay]}요일 기록 위를 지나는 중`):'모의 시간 · 밤은 건너뜀';$('.arena-wrap').classList.toggle('night',!!state?.night);$('#mode').textContent=describe(state);$('#cum-count').textContent='누적 감염 '+(state?.cum||0)+'명';
   $('#step-count').textContent=(m.steps||0).toLocaleString()+'문장';
   if(m.seeds)lastSeeds=m.seeds;
-  if(m.logs?.length)renderLog(m.logs);$('#csv').disabled=!allSeries.length||busy;controls();if(!busy){draw();drawChart();}
+  if(m.logs?.length)renderLog(m.logs);$('#csv').disabled=!allSeries.length||busy;controls();if(!busy){draw();drawChart();}else{if(reduced)redrawSoon();if(performance.now()-lastDraw>180)draw();}
 }
 async function init(){
   try{
@@ -194,7 +194,7 @@ function skyColors(frac,night){
 function drawSky(s,now){
   const p=theme(),night=!!s?.night,frac=s?clamp((s.time%288)/192):0,[c1,c2]=skyColors(frac,night);
   const grad=ctx.createLinearGradient(0,0,0,SKY);grad.addColorStop(0,c1);grad.addColorStop(1,c2);ctx.fillStyle=grad;ctx.fillRect(0,0,W,SKY);
-  if(night){ctx.fillStyle='#fff';for(let i=0;i<26;i++){const x=(i*173+37)%W,y=(i*59+11)%(SKY-14)+4,tw=.6+.5*Math.sin(now/400+i);ctx.globalAlpha=.6*tw;ctx.fillRect(x,y,1.5,1.5);}ctx.globalAlpha=1;
+  if(night){ctx.fillStyle='#fff';for(let i=0;i<26;i++){const x=(i*173+37)%W,y=(i*59+11)%(SKY-14)+4,tw=reduced?.85:.6+.5*Math.sin(now/400+i);ctx.globalAlpha=.6*tw;ctx.fillRect(x,y,1.5,1.5);}ctx.globalAlpha=1;
     ctx.fillStyle='#f6ecc7';ctx.beginPath();ctx.arc(W/2+40,28,11,0,Math.PI*2);ctx.fill();ctx.fillStyle=c1;ctx.beginPath();ctx.arc(W/2+47,24,10,0,Math.PI*2);ctx.fill();}
   else{const x=300+frac*(W-600),y=SKY-4-Math.sin(frac*Math.PI)*34;const g=ctx.createRadialGradient(x,y,2,x,y,16);g.addColorStop(0,'#fff3b0');g.addColorStop(.5,'#f7c948');g.addColorStop(1,'#f7c94800');ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,16,0,Math.PI*2);ctx.fill();}
   // 지평선
@@ -202,7 +202,7 @@ function drawSky(s,now){
 }
 function draw(){
   const w=canvas.getBoundingClientRect().width;if(!setup(canvas,ctx,w*H/W))return;
-  const p=theme(),now=performance.now(),s=state;
+  const p=theme(),now=performance.now(),s=state;lastDraw=now;
   ctx.drawImage(buildBackground(),0,0,canvas.width,canvas.height,0,0,W,H);
   ctx.save();ctx.setTransform(canvas.width/W,0,0,canvas.height/H,0,0);
   drawSky(s,now);
@@ -211,7 +211,7 @@ function draw(){
   for(const tr of contactTrails){const age=(now-tr.at)/650;if(age>1)continue;ctx.strokeStyle=p.contact;ctx.globalAlpha=.45*(1-age);ctx.lineWidth=1;ctx.beginPath();for(let i=0;i<tr.pairs.length;i+=2){const [x1,y1]=px(tr.pairs[i]),[x2,y2]=px(tr.pairs[i+1]);ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);}ctx.stroke();}
   ctx.globalAlpha=1;
   // 마을 사람들
-  const pulse=.5+.5*Math.sin(now/260);
+  const pulse=reduced?.5:.5+.5*Math.sin(now/260);
   for(let i=1;i<=469;i++){
     const code=people?people[i-1]:0,st=code&3,vac=code>>2&1,imm=code>>3&1,iso=code>>4&1,idx=code>>5&1,[x,y]=px(i);
     if(st===I){const r=11+4*pulse,g=ctx.createRadialGradient(x,y,2,x,y,r);g.addColorStop(0,p.I+'99');g.addColorStop(1,p.I+'00');ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();}
@@ -238,7 +238,7 @@ function draw(){
     ctx.strokeStyle=p.spark;ctx.globalAlpha=.5;ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(x1,y1);ctx.quadraticCurveTo((x1+x2)/2,(y1+y2)/2-28,x,y);ctx.stroke();ctx.globalAlpha=1;
     ctx.fillStyle=p.spark;ctx.beginPath();ctx.arc(x,y,3.2,0,Math.PI*2);ctx.fill();}
   sparks=remain;
-  const keep=[];for(const rp of ripples){const t=(now-rp.at)/700;if(t>=1)continue;keep.push(rp);ctx.strokeStyle=p.spark;ctx.globalAlpha=(1-t)*.8;ctx.lineWidth=2-t;ctx.beginPath();ctx.arc(rp.x,rp.y,6+t*16,0,Math.PI*2);ctx.stroke();}
+  const keep=[];for(const rp of ripples){const t=(now-rp.at)/700;if(t>=1)continue;keep.push(rp);ctx.strokeStyle=p.spark;ctx.globalAlpha=(1-t)*.8;ctx.lineWidth=reduced?1.6:2-t;ctx.beginPath();ctx.arc(rp.x,rp.y,reduced?12:6+t*16,0,Math.PI*2);ctx.stroke();}
   ripples=keep;ctx.globalAlpha=1;
   ctx.restore();
 }
@@ -366,7 +366,11 @@ function drawChart(){
   cc.restore();
   $('#chart-scale').textContent=`Y축 0–${ymax}명 · 자동 범위 · X축 ${span}일 · 한 시간 간격 표본`;
 }
-window.render_game_to_text=()=>JSON.stringify({app:'동현빌',version:'0.79',busy,state:state?{day:state.day,clock:state.clock,night:state.night,counts:state.counts,cum:state.cum,pathogen:state.pathogenName,index:state.index}:null,coordinates:'960×720, x right, y down; sky strip 44px at top; 469 villagers at fixed positions'});
+window.render_game_to_text=()=>JSON.stringify({app:'동현빌',version:($('.edition')?.firstChild?.textContent||'').trim().replace(/^v/,''),busy,state:state?{day:state.day,clock:state.clock,night:state.night,counts:state.counts,cum:state.cum,pathogen:state.pathogenName,index:state.index}:null,coordinates:'960×720, x right, y down; sky strip 44px at top; 469 villagers at fixed positions'});
+/* 동작 줄이기(윈도우 ‘애니메이션 효과’ 끔 등): 연속 애니메이션은 돌리지 않는다. 그래도 사람들의 상태는 정보이므로,
+   계산이 새 상태를 보낼 때마다 장면을 한 번씩 다시 그린다. 불꽃의 비행·물결의 퍼짐·깜빡임만 멈춘다.
+   또 브라우저가 화면 갱신 호출을 드물게 줄 때(0.18초 넘게 그림이 없을 때)는 새 상태를 받은 자리에서 바로 그린다. */
+let redrawQueued=false;function redrawSoon(){if(redrawQueued)return;redrawQueued=true;requestAnimationFrame(()=>{redrawQueued=false;draw();});}
 let ticking=false;function animate(){if(ticking)return;ticking=true;const frame=()=>{draw();if(busy&&!reduced)requestAnimationFrame(frame);else{ticking=false;draw();drawChart();}};requestAnimationFrame(frame);}
 let chartTimer=0;const chartLoop=()=>{if(busy)drawChart();if(busy)chartTimer=setTimeout(chartLoop,500);};
 new ResizeObserver(()=>{draw();drawChart();}).observe($('.observation'));document.fonts.ready.then(()=>{draw();drawChart();});
