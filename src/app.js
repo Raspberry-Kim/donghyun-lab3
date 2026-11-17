@@ -2,7 +2,9 @@ const $=s=>document.querySelector(s),canvas=$('#arena'),ctx=canvas.getContext('2
 const W=960,H=720,SKY=60;
 let worker,ready=false,busy=false,state=null,people=null,series=[],allSeries=[],lastSource='',data=null,workerURL='',chartPeak=0,layout=null,paths=[],meadows=[],bg=null,bgKey='';
 let contactTrails=[],sparks=[],ripples=[],lastDay=-1,archive=[],runIndex=0,extArr={},lastDraw=0;
-const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+/* 장면의 동작은 내용이므로 운영체제의 ‘동작 줄이기’(윈도우 ‘애니메이션 효과’ 끔 등)를 따라 멈추지 않는다.
+   동작을 줄여 보려면 주소 끝에 ?motion=reduce 를 붙인다. */
+const reduced=new URLSearchParams(location.search).get('motion')==='reduce';
 const S=0,E=1,I=2,R=3;
 const palette={
   light:{paper:'#f3ecdc',meadow:['#d6e3bf','#e9dfc2','#cfe0d0','#eadcc0'],path:'#b7a98a',S:'#fbf6ea',Sline:'#a69578',E:'#f3c049',Eline:'#b98915',I:'#e2553a',Iline:'#9e3220',R:'#a9c7dc',Rline:'#6d93ad',V:'#3f9463',Q:'#7d6a52',contact:'#8f7b5a',spark:'#ff6a3d',text:'#6e6356',ink:'#26211c'},
@@ -367,7 +369,7 @@ function drawChart(){
   $('#chart-scale').textContent=`Y축 0–${ymax}명 · 자동 범위 · X축 ${span}일 · 한 시간 간격 표본`;
 }
 window.render_game_to_text=()=>JSON.stringify({app:'동현빌',version:($('.edition')?.firstChild?.textContent||'').trim().replace(/^v/,''),busy,state:state?{day:state.day,clock:state.clock,night:state.night,counts:state.counts,cum:state.cum,pathogen:state.pathogenName,index:state.index}:null,coordinates:'960×720, x right, y down; sky strip 44px at top; 469 villagers at fixed positions'});
-/* 동작 줄이기(윈도우 ‘애니메이션 효과’ 끔 등): 연속 애니메이션은 돌리지 않는다. 그래도 사람들의 상태는 정보이므로,
+/* 주소에 ?motion=reduce 를 붙여 동작을 줄였을 때: 연속 애니메이션은 돌리지 않는다. 그래도 사람들의 상태는 정보이므로,
    계산이 새 상태를 보낼 때마다 장면을 한 번씩 다시 그린다. 불꽃의 비행·물결의 퍼짐·깜빡임만 멈춘다.
    또 브라우저가 화면 갱신 호출을 드물게 줄 때(0.18초 넘게 그림이 없을 때)는 새 상태를 받은 자리에서 바로 그린다. */
 let redrawQueued=false;function redrawSoon(){if(redrawQueued)return;redrawQueued=true;requestAnimationFrame(()=>{redrawQueued=false;draw();});}
