@@ -55,14 +55,32 @@ fs.mkdirSync(out,{recursive:true});
     check('top-right meters, bottom-left example, light default and original full-content dark theme');
     for(const [width,height] of [[1440,900],[1280,600],[390,844],[320,700],[844,390],[1440,900]]){
       await p.setViewportSize({width,height});await settled();
-      const boxes=await p.evaluate(()=>['#arena','#chart','#full-exit','#theme','#run','#slow','#repeat10','#halt','.chart-legend','.dh-full-meters','.dh-full-caption'].map(selector=>{
+      // Phones: the scene fills the column and the graph, legends and caption scroll below it.
+      const phone=width<600||height<=500||(width<=780&&height>500);
+      const always=['#arena','#full-exit','#theme','#run','#slow','#repeat10','#halt'],below=['#chart','.chart-legend','.dh-full-meters','.dh-full-caption'];
+      const measure=list=>p.evaluate(list=>list.map(selector=>{
         const r=document.querySelector(selector).getBoundingClientRect();
-        return {selector,visible:r.width>0&&r.height>0,fit:r.left>=-1&&r.right<=innerWidth+1&&r.top>=-1&&r.bottom<=innerHeight+1};
-      }));
+        return {selector,visible:r.width>0&&r.height>0,fit:r.left>=-1&&r.right<=innerWidth+1&&r.top>=-1&&r.bottom<=innerHeight+1,box:[r.left,r.top,r.width,r.height].map(Math.round)};
+      }),list);
+      const boxes=await measure(phone?always:[...always,...below]);
       assert(boxes.every(x=>x.visible&&x.fit),JSON.stringify({width,height,boxes}));
+      if(phone){
+        const scene=boxes[0].box,[limit,host]=await p.evaluate(()=>{const o=document.querySelector('#dh-fullscreen'),m=getComputedStyle(o).getPropertyValue('--dh-full-fit').trim();return [document.querySelector(m==='scene'?'.dh-full-scene':'.dh-full-visuals').clientHeight,document.querySelector('.dh-full-arena').clientWidth];});
+        // The scene takes the whole column width, or the whole visible height when that is the tighter limit.
+        assert(scene[2]>=host-2||scene[3]>=limit-2,JSON.stringify({width,height,scene,limit,host}));
+        assert(scene[2]>=Math.min(width,height*1.3)*.55,JSON.stringify({width,height,scene}));
+        for(const selector of below){
+          const r=await p.evaluate(selector=>{const e=document.querySelector(selector);e.scrollIntoView({block:'start'});const r=e.getBoundingClientRect(),v=document.querySelector('.dh-full-visuals').getBoundingClientRect();
+            return {selector,visible:r.width>0&&r.height>0,reach:r.left>=-1&&r.right<=innerWidth+1&&r.top>=v.top-1&&r.top<v.bottom-20};},selector);
+          assert(r.visible&&r.reach,JSON.stringify({width,height,r}));
+        }
+        // Scrolled parts never cover the fixed top row or the run controls.
+        assert(await p.evaluate(()=>{const v=document.querySelector('.dh-full-visuals').getBoundingClientRect();return ['#full-exit','#run','#halt'].every(s=>{const r=document.querySelector(s).getBoundingClientRect();return r.bottom<=v.top+1||r.top>=v.bottom-1;})&&document.querySelector('#dh-fullscreen').scrollWidth<=innerWidth+1;}));
+        await p.evaluate(()=>{for(const e of document.querySelectorAll('.dh-full-visuals,.dh-full-scene,.dh-full-graph'))e.scrollTop=0;});
+      }
       await p.screenshot({path:path.join(out,'full-'+width+'x'+height+'.png')});
     }
-    check('scene, graph, legends and all controls fit six viewport transitions');
+    check('scene and controls fit six viewport transitions; on phones the scene is large and the rest scrolls');
     await p.evaluate(()=>{window.meterUpdates=0;new MutationObserver(()=>meterUpdates++).observe(originalMeters,{childList:true,subtree:true,characterData:true});});
     await p.locator('#run').click();
     await p.waitForFunction(()=>!document.querySelector('#halt').disabled);
