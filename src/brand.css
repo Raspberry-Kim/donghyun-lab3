@@ -32,7 +32,7 @@ button:hover:not(:disabled),.file-button:hover{background:var(--surface2)}
 .getting-started p{color:var(--muted)}.getting-started strong{color:var(--ink)}.getting-started a{white-space:nowrap;text-decoration:none;color:var(--ink);font-weight:700;border-bottom:2px solid var(--accent);padding:6px 0}
 .readouts{grid-template-columns:repeat(4,minmax(0,1fr))}.readouts>div{padding:12px}.readouts span small{display:block;margin:0}
 .citations{font-size:var(--text-sm)}
-footer{flex-wrap:wrap}
+footer{flex-wrap:wrap;gap:8px 20px}footer a{white-space:nowrap}
 @media(max-width:780px){.getting-started{align-items:flex-start;flex-direction:column;gap:6px;padding:12px}.getting-started p{line-height:1.7}.readouts{grid-template-columns:1fr 1fr}.readouts>div:nth-child(2){border-right:0}.readouts>div:nth-child(-n+2){border-bottom:1px solid var(--line)}.readouts>div{padding:10px 12px}.legend .hint{display:flex;margin-left:0}.arena-top small{display:block;font-size:12px}}
 .document p,.document ul,.document ol{color:var(--muted)}
 .document code{background:var(--surface2)}

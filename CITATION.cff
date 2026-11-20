@@ -2,8 +2,8 @@ cff-version: 1.2.0
 message: "If you use this software, please cite it using the metadata below."
 title: "Donghyunvil (동현빌): an educational village-outbreak laboratory on a real contact network, controlled through the esoteric language Donghyun-lang"
 type: software
-version: "0.83"
-date-released: "2026-11-17"
+version: "0.84"
+date-released: "2026-11-20"
 doi: "10.5281/zenodo.23689490"
 authors:
   - family-names: Kim
@@ -14,12 +14,12 @@ license: MIT
 repository-code: "https://github.com/Raspberry-Kim/donghyun-lab3"
 url: "https://raspberry-kim.github.io/donghyun-lab3/"
 abstract: >-
-  Version 0.83 keeps the live scene animating at its ordinary rate when the
-  operating system reports reduced motion (for example Chrome or Edge on
-  Windows with animation effects turned off); motion can still be reduced by
-  adding ?motion=reduce to the address. Version 0.82 fixed the scene staying on its
-  first picture in that condition and enlarged the scene in fullscreen on
-  phones.
+  Version 0.84 brings the footer links in line with the rest of the Donghyun
+  series: Donghyun-lang, its repository, this repository and the seventeen
+  other laboratories now appear as one list in series order. Version 0.83
+  kept the live scene animating at its ordinary rate when the operating
+  system reports reduced motion; motion can still be reduced by adding
+  ?motion=reduce to the address.
   The simulation model, data and language semantics are unchanged.
   Donghyunvil is a browser-based, noncommercial educational laboratory for
   exploring infectious disease transmission, vaccination and isolation
