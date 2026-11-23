@@ -8,7 +8,7 @@
 - 2017년 10월 12~14일 영국 Haslemere에서 BBC Pandemic 앱 사용자 469명 사이의 5분 간격 거리(50 m 이내)를 담은 102,831행과 시간표. 이 실험은 2018년 3월 22일 방송된 BBC Four 다큐멘터리 「Contagion! The BBC Four Pandemic」을 위한 시민 과학 프로젝트였다.
 - 원 논문: Kissler SM 등. Sparking "The BBC Four Pandemic". bioRxiv 479154 (2018). [doi:10.1101/479154](https://doi.org/10.1101/479154). 다큐멘터리 모델: Klepac P, Kissler S, Gog J. Epidemics 2018;24:49–59. [PubMed](https://pubmed.ncbi.nlm.nih.gov/29576516/).
 - 동현빌은 두 CSV를 `data/raw/`에 그대로 두고, `tools/build-village.cjs`로 손실 없이 압축해 `data/village.json`에 담았다. 거리 값, 사람 번호, 시간 단계는 바꾸지 않았다.
-- 참가자들은 번호로만 남아 있고 위치는 공개되지 않았다. 동현빌도 누구인지 알 수 없으며, 화면의 자리는 계산한 배치일 뿐이다.
+- 참가자들은 번호로만 남아 있고 위치는 공개되지 않았다. 동현빌도 누구인지 알 수 없으며, 화면의 자리는 계산한 배치다.
 
 ## 병원체 숫자의 출처
 
