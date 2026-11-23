@@ -2,8 +2,8 @@ cff-version: 1.2.0
 message: "If you use this software, please cite it using the metadata below."
 title: "Donghyunvil (동현빌): an educational village-outbreak laboratory on a real contact network, controlled through the esoteric language Donghyun-lang"
 type: software
-version: "0.84"
-date-released: "2026-11-20"
+version: "0.85"
+date-released: "2026-11-23"
 doi: "10.5281/zenodo.23689490"
 authors:
   - family-names: Kim
@@ -14,7 +14,8 @@ license: MIT
 repository-code: "https://github.com/Raspberry-Kim/donghyun-lab3"
 url: "https://raspberry-kim.github.io/donghyun-lab3/"
 abstract: >-
-  Version 0.84 brings the footer links in line with the rest of the Donghyun
+  Version 0.85 rewords six example notes and one credit line without
+  changing behaviour. Version 0.84 brought the footer links in line with the rest of the Donghyun
   series: Donghyun-lang, its repository, this repository and the seventeen
   other laboratories now appear as one list in series order. Version 0.83
   kept the live scene animating at its ordinary rate when the operating
