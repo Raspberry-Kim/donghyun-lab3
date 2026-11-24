@@ -129,4 +129,4 @@ S/E/I/R/V/Q 박스를 우측 상단에, 예제 이름·설명과 실행 결과·
 
 ## 시리즈 연결
 
-[동현랭](https://raspberry-kim.github.io/donghyun-lang/)과 스물두 실험실을 상단 메뉴로 오간다. [동현레](https://raspberry-kim.github.io/donghyun-lab19/)는 기지를 짓고 부대를 모아 컴퓨터와 1:1로 겨루는 실시간 전략 게임이고, [동현페](https://raspberry-kim.github.io/donghyun-lab20/)는 아몰랑이 궁전 열네 층을 지나는 모험 게임이고, [동현스](https://raspberry-kim.github.io/donghyun-lab21/)는 연필로 그린 비행기를 조종하는 세로 슈팅 게임이고, [동현촙](https://raspberry-kim.github.io/donghyun-lab22/)은 연필로 그린 헬기로 사람들을 기지로 데려오는 가로 화면 게임이다. 데스크톱 메뉴는 동현랭이 두 줄 높이이고 실험실은 11열×2줄, 모바일은 두 열이다.
+[동현랭](https://raspberry-kim.github.io/donghyun-lang/)과 스물세 실험실을 상단 메뉴로 오간다. [동현레](https://raspberry-kim.github.io/donghyun-lab19/)는 기지를 짓고 부대를 모아 컴퓨터와 1:1로 겨루는 실시간 전략 게임이고, [동현페](https://raspberry-kim.github.io/donghyun-lab20/)는 아몰랑이 궁전 열네 층을 지나는 모험 게임이고, [동현스](https://raspberry-kim.github.io/donghyun-lab21/)는 연필로 그린 비행기를 조종하는 세로 슈팅 게임이고, [동현촙](https://raspberry-kim.github.io/donghyun-lab22/)은 연필로 그린 헬기로 사람들을 기지로 데려오는 가로 화면 게임이고, [동현잠](https://raspberry-kim.github.io/donghyun-lab23/)은 연필로 그린 잠수함으로 바다 괴물과 겨루는 가로 화면 게임이다. 데스크톱 메뉴는 12열×2줄, 모바일은 두 열이다.
